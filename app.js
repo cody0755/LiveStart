@@ -4,6 +4,7 @@
  */
 
 var express = require('express')
+  , partials = require('express-partials')
   , routes = require('./routes')
   , user = require('./routes/user')
   , http = require('http')
@@ -15,6 +16,7 @@ app.configure(function(){
   app.set('port', process.env.PORT || 3000);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'ejs');
+  app.use(partials());
   app.use(express.favicon());
   app.use(express.logger('dev'));
   app.use(express.bodyParser());
