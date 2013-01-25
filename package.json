@@ -1,7 +1,9 @@
 {
-  "name": "application-name",
+  "name": "LiveStart",
   "version": "0.0.1",
   "private": true,
+  "author" : "thewei <thewei@99is.com>",
+  "description":"a simple nodejs front end tool to start your product!",
   "scripts": {
     "start": "node app"
   },
@@ -10,6 +12,7 @@
     "ejs": "*",
     "express-ejs-layouts":"*",
     "express-partials":"*",
-    "mongodb":"*"
+    "mongodb":"*",
+    "xml2js":"*"
   }
 }
