@@ -1,33 +1,109 @@
-
-/**
- * CSS处理.
- */
-
-function CssParse(data){
-    this.layers = data.layers || {};
-    this.cssModel = [];
-}
-
-// 接口
-module.exports = CssParse;
+/**
+ * CSS处理.
+ */
 
-CssParse.prototype.parseColor = function parseColor(red,green,blue){
+function CssParse(data){
+    this.layers = data.layers || {};
+    this.cssModel = [];
+    this.cssTempModel = [];
+}
+
+// 接口
+module.exports = CssParse;
+
+// 处理十六进制颜色
+CssParse.prototype.parseColor = function(red,green,blue){
 	var hR=Math.round(red).toString(16),
 		hG=Math.round(green).toString(16),
 		hB=Math.round(blue).toString(16); 
 	return "#"+(red<16?("0"+hR):hR)+(green<16?("0"+hG):hG)+(blue<16?("0"+hB):hB);
 };
 
-/*
+// 遍历属性方法
+CssParse.prototype.loopList = function(data,array){
+	if(data){
+		for (var i =  0; i < data.length ; i++) {
+			if(typeof array == "undefined"){
+				var oneArray = this.loopOne(data[i]);
+			}else {
+				var oneArray = this.loopOne(data[i],array);
+			}
+			
+			if(oneArray) {
+				for(var k in oneArray){
+					if(typeof array == "undefined"){
+						this.cssTempModel[k] = oneArray[k];
+					}else {
+						array[k] = oneArray[k];
+					}
+				}
+			}
+		};
+	};
+};
+
+CssParse.prototype.loopElement = function(data){
+	this.cssTempModel = [];
+	this.loopList(data);
+	return this.cssTempModel;
+
+};
+
+CssParse.prototype.loopOne = function(data,array){
+	var oneArray = [],
+		newArray = ( array = array || this.cssTempModel);
+	// 处理数据列表
+	if(typeof data.list != "undefined"){
+		if(typeof data.list[0].element != "undefined"){
+			if(typeof data.$.stringid != "undefined"){
+				newArray = array[data.$.stringid] = [];
+			}else if(typeof data.$.id != "undefined"){
+				newArray = array[data.$.id] = [];
+			};
+			this.loopList(data.list[0].element,newArray);
+		}
+		return null;
+	}
+	// 处理数据组
+	if(typeof data.descriptor != "undefined"){
+		if(typeof data.descriptor[0].element != "undefined"){
+			if(typeof data.$.stringid != "undefined"){
+				newArray = array[data.$.stringid] = [];
+			}else if(typeof data.$.id != "undefined"){
+				newArray = array[data.$.id] = [];
+			};
+			this.loopList(data.descriptor[0].element,newArray);
+			
+		}
+		return null;
+	}
+	// 如果只有一层
+	if(typeof data.value != "undefined"){
+		if(typeof data.$.stringid != "undefined"){
+			oneArray[data.$.stringid] = data.value;
+			return oneArray;
+		}else if(typeof data.$.id != "undefined") {
+			oneArray[data.$.id] = data.value
+			return oneArray;
+		}
+	};
+}
+
+
+/*
 	处理CSS
 */
-CssParse.prototype.toCss = function toCss(){
-
+CssParse.prototype.toCss = function(){
+
+
+
     var csstext = "",
     	cssArray = [];
-    
+    
+
     // 遍历图层
-    for(var i=0; i< this.layers.length; i++){
+    for(var i=0; i< this.layers.length; i++){
+
         var layer = this.layers[i].layer[0], // 单个图层
         	descriptor = layer.descriptor,
         	descriptor_element = descriptor[0].element,
@@ -80,27 +156,54 @@ CssParse.prototype.toCss = function toCss(){
         		case "layerFXVisible": this.cssModel["layerFXVisible"] = element.value;
         							   break;
         		// 文本信息
+        		/*
         		case "textKey": var textKeyData = element.descriptor[0].element;
         						this.cssModel["textKey"] = [];
         						for(var j=0; j<textKeyData.length; j++){
         							if(typeof textKeyData[j].value != "undefined"){
         								this.cssModel["textKey"][textKeyData[j].$.stringid] = textKeyData[j].value;
-        							}
-        							if(typeof textKeyData[j].descriptor != "undefined"){
+        							}else if(typeof textKeyData[j].descriptor != "undefined"){
         								this.cssModel["textKey"][textKeyData[j].$.stringid] = [];
-        								for(var y=0; y< textKeyData[j].descriptor[0].element; y++){
-        									this.cssModel["textKey"][textKeyData[j].$.stringid][textKeyData[j].descriptor[0].element[y].$.stringid] = textKeyData[j].descriptor[0].element[y].value;
-        								}
-        							}
-        							if(typeof textKeyData[j].list != "undefined"){
-        								for(var y=0; y< textKeyData[j].list[0].element; y++){
-        									for(var a=0; a< textKeyData[j].list[0].element[y].descriptor[0].element; a++){
-
-        									};
-
+        								var a1 = textKeyData[j].descriptor[0].element;
+        								for(var y=0; y< a1.length; y++){
+        									this.cssModel["textKey"][textKeyData[j].$.stringid][a1[y].$.stringid] = a1[y].value;
+        								};
+        							}else if(typeof textKeyData[j].list != "undefined"){
+        								this.cssModel["textKey"][textKeyData[j].$.stringid] = [];
+        								if(typeof textKeyData[j].list[0].element == "object") {
+        									var a2 = textKeyData[j].list[0].element;
+	        								for(var y=0; y< a2.length; y++){
+	        									this.cssModel["textKey"][textKeyData[j].$.stringid][a2[y].$.id] = [];
+	        									if(typeof a2[y].descriptor[0].element == "object") {
+	        										var a3 = textKeyData[j].list[0].element[y].descriptor[0].element;
+	        										for(var a=0; a< a3.length; a++){
+	        											if(typeof a3[a].value != "undefined"){
+	        												this.cssModel["textKey"][textKeyData[j].$.stringid][a2[y].$.id][a3[a].$.stringid] = a3[a].value;
+	        											}else {
+	        												this.cssModel["textKey"][textKeyData[j].$.stringid][a2[y].$.id][a3[a].$.stringid]=[];
+	        												var a4 = textKeyData[j].list[0].element[y].descriptor[0].element[a].descriptor[0].element;
+	        												for(var b=0; b< a4.length; b++){
+	        													if(typeof a4[b].value != "undefined"){
+	        														this.cssModel["textKey"][textKeyData[j].$.stringid][a2[y].$.id][a3[a].$.stringid][a4[b].$.stringid] = a4[b].value;
+	        													}else {
+	        														this.cssModel["textKey"][textKeyData[j].$.stringid][a2[y].$.id][a3[a].$.stringid][a4[b].$.stringid] = []
+	        														for(var c=0; c<a4[b].descriptor[0].element.length; c++){
+	        															this.cssModel["textKey"][textKeyData[j].$.stringid][a2[y].$.id][a3[a].$.stringid][a4[b].$.stringid][a4[b].descriptor[0].element[c].$.stringid] = a4[b].descriptor[0].element[c].value;
+	        														}
+	        													}
+	        												}
+	        											}
+		        									};
+	        									}
+	        								}
         								}
         							};
         						};
+        						break;
+        		*/
+        		case "textKey": var textKeyData = element.descriptor[0].element;
+        						this.cssModel["text"] = [];
+        						this.cssModel["text"] = this.loopElement(textKeyData);
         						break;
 				// 图层样式
 				case "layerEffects": var layerEffects =  element.descriptor[0].element;
@@ -181,164 +284,6 @@ CssParse.prototype.toCss = function toCss(){
 									 		
 									 	};
 
-
-									 	/*
-									 	switch(layerEffects[j].$.stringid){
-									 		// 颜色填充
-									 		case "solidFill": 	var layereffects_element = layerEffects[j].descriptor[0].element;
-									 						 	this.cssModel["layerFX_solidFill"]=[];
-									 						 	this.cssModel["layerFX_solidFill"]["enabled"] = layereffects_element[0].value; // 是否开启
-									 						 	this.cssModel["layerFX_solidFill"]["mode"] = layereffects_element[1].value; // 混合模式
-									 						 	this.cssModel["layerFX_solidFill"]["opacity"] = layereffects_element[2].value; // 不透明度
-									 						 	this.cssModel["layerFX_solidFill"]["color"] = []; // 颜色
-									 						 	this.cssModel["layerFX_solidFill"]["color"]["red"] = layereffects_element[3].descriptor[0].element[0].value;
-									 						 	this.cssModel["layerFX_solidFill"]["color"]["green"] = layereffects_element[3].descriptor[0].element[1].value;
-									 						 	this.cssModel["layerFX_solidFill"]["color"]["blue"] = layereffects_element[3].descriptor[0].element[2].value;
-									 							this.cssModel["layerFX_solidFill"]["color"]["hexValue"] = (function(){
-									 						 		var hR=Math.round(layereffects_element[3].descriptor[0].element[0].value).toString(16),
-																		hG=Math.round(layereffects_element[3].descriptor[0].element[1].value).toString(16),
-																		hB=Math.round(layereffects_element[3].descriptor[0].element[2].value).toString(16); 
-																	return "#"+(layereffects_element[3].descriptor[0].element[0].value<16?("0"+hR):hR)+(layereffects_element[3].descriptor[0].element[1].value<16?("0"+hG):hG)+(layereffects_element[3].descriptor[0].element[2].value<16?("0"+hB):hB); 
-									 						 	})();
-									 						 	break;
-									 		// 描边
-									 		case "frameFX": var layereffects_element = layerEffects[j].descriptor[0].element;
-									 						this.cssModel["layerFX_frameFX"]=[];
-									 						this.cssModel["layerFX_frameFX"]["enabled"] = layereffects_element[0].value; // 是否开启
-									 						this.cssModel["layerFX_frameFX"]["frameStyle"] = layereffects_element[1].value; // 描边位置:outsetFrame
-									 						this.cssModel["layerFX_frameFX"]["paintType"] = layereffects_element[2].value; // 填充类型
-									 						this.cssModel["layerFX_frameFX"]["mode"] = layereffects_element[3].value; // 混合模式
-									 						this.cssModel["layerFX_frameFX"]["opacity"] = layereffects_element[4].value; // 不透明度
-									 						this.cssModel["layerFX_frameFX"]["size"] = layereffects_element[5].value; // 描边大小
-									 						this.cssModel["layerFX_frameFX"]["color"] = []; // 颜色
-									 						this.cssModel["layerFX_frameFX"]["color"]["red"] = layereffects_element[6].descriptor[0].element[0].value;
-									 						this.cssModel["layerFX_frameFX"]["color"]["green"] = layereffects_element[6].descriptor[0].element[0].value;
-									 						this.cssModel["layerFX_frameFX"]["color"]["blue"] = layereffects_element[6].descriptor[0].element[0].value;
-									 						this.cssModel["layerFX_frameFX"]["color"]["hexValue"] = (function(){
-									 						 	var hR=Math.round(layereffects_element[6].descriptor[0].element[0].value).toString(16),
-																	hG=Math.round(layereffects_element[6].descriptor[0].element[1].value).toString(16),
-																	hB=Math.round(layereffects_element[6].descriptor[0].element[2].value).toString(16); 
-																return "#"+(layereffects_element[6].descriptor[0].element[0].value<16?("0"+hR):hR)+(layereffects_element[6].descriptor[0].element[1].value<16?("0"+hG):hG)+(layereffects_element[6].descriptor[0].element[2].value<16?("0"+hB):hB); 
-									 						 })();
-									 						break;
-									 		// 内阴影
-									 		case "innerShadow": var layereffects_element = layerEffects[j].descriptor[0].element;
-									 							this.cssModel["layerFX_innerShadow"]=[];
-									 							this.cssModel["layerFX_innerShadow"]["enabled"] = layereffects_element[0].value; // 是否开启
-									 							this.cssModel["layerFX_innerShadow"]["mode"] = layereffects_element[1].value; // 混合模式
-									 							this.cssModel["layerFX_innerShadow"]["color"] = []; // 颜色
-									 							this.cssModel["layerFX_innerShadow"]["color"]["red"] = layereffects_element[2].descriptor[0].element[0].value;
-										 						this.cssModel["layerFX_innerShadow"]["color"]["green"] = layereffects_element[2].descriptor[0].element[0].value;
-										 						this.cssModel["layerFX_innerShadow"]["color"]["blue"] = layereffects_element[2].descriptor[0].element[0].value;
-										 						this.cssModel["layerFX_innerShadow"]["color"]["hexValue"] = (function(){
-										 						 	var hR=Math.round(layereffects_element[2].descriptor[0].element[0].value).toString(16),
-																		hG=Math.round(layereffects_element[2].descriptor[0].element[1].value).toString(16),
-																		hB=Math.round(layereffects_element[2].descriptor[0].element[2].value).toString(16); 
-																	return "#"+(layereffects_element[2].descriptor[0].element[0].value<16?("0"+hR):hR)+(layereffects_element[2].descriptor[0].element[1].value<16?("0"+hG):hG)+(layereffects_element[2].descriptor[0].element[2].value<16?("0"+hB):hB); 
-										 						 })();
-										 						this.cssModel["layerFX_innerShadow"]["opacity"] = layereffects_element[3].value; // 不透明度
-										 						this.cssModel["layerFX_innerShadow"]["useGlobalAngle"] = layereffects_element[4].value; // 是否使用全局灯光
-										 						this.cssModel["layerFX_innerShadow"]["localLightingAngle"] = layereffects_element[5].value; // 灯光角度
-										 						this.cssModel["layerFX_innerShadow"]["distance"] = layereffects_element[6].value; // 距离
-										 						this.cssModel["layerFX_innerShadow"]["chokeMatte"] = layereffects_element[7].value; // 阻塞
-										 						this.cssModel["layerFX_innerShadow"]["blur"] = layereffects_element[8].value; // 模糊(大小)
-										 						this.cssModel["layerFX_innerShadow"]["noise"] = layereffects_element[9].value; // 杂色
-										 						this.cssModel["layerFX_innerShadow"]["antiAlias"] = layereffects_element[10].value; // 是否消除锯齿
-										 						this.cssModel["layerFX_innerShadow"]["transferSpec"] = layereffects_element[11].descriptor[0].elenemt[0].value; // 等高线
-									 						    break;
-									 		// 外发光
-									 		case "outerGlow": 	var layereffects_element = layerEffects[j].descriptor[0].element;
-									 						  	this.cssModel["layerFX_outerGlow"]=[];
-									 							this.cssModel["layerFX_outerGlow"]["enabled"] = layereffects_element[0].value; // 是否开启
-									 							this.cssModel["layerFX_outerGlow"]["mode"] = layereffects_element[1].value; // 混合模式
-									 							this.cssModel["layerFX_outerGlow"]["color"] = []; // 颜色
-									 							this.cssModel["layerFX_outerGlow"]["color"]["red"] = layereffects_element[2].descriptor[0].element[0].value;
-										 						this.cssModel["layerFX_outerGlow"]["color"]["green"] = layereffects_element[2].descriptor[0].element[0].value;
-										 						this.cssModel["layerFX_outerGlow"]["color"]["blue"] = layereffects_element[2].descriptor[0].element[0].value;
-										 						this.cssModel["layerFX_outerGlow"]["color"]["hexValue"] = (function(){
-										 						 	var hR=Math.round(layereffects_element[2].descriptor[0].element[0].value).toString(16),
-																		hG=Math.round(layereffects_element[2].descriptor[0].element[1].value).toString(16),
-																		hB=Math.round(layereffects_element[2].descriptor[0].element[2].value).toString(16); 
-																	return "#"+(layereffects_element[2].descriptor[0].element[0].value<16?("0"+hR):hR)+(layereffects_element[2].descriptor[0].element[1].value<16?("0"+hG):hG)+(layereffects_element[2].descriptor[0].element[2].value<16?("0"+hB):hB); 
-										 						 })();
-										 						this.cssModel["layerFX_outerGlow"]["opacity"] = layereffects_element[3].value; // 不透明度
-										 						this.cssModel["layerFX_outerGlow"]["glowTechnique"] = layereffects_element[4].value; // 图素-方法（发光方式）
-										 						this.cssModel["layerFX_outerGlow"]["chokeMatte"] = layereffects_element[5].value; // 图素-扩展
-										 						this.cssModel["layerFX_outerGlow"]["blur"] = layereffects_element[6].value; // 图素-模糊大小
-										 						this.cssModel["layerFX_outerGlow"]["noise"] = layereffects_element[7].value; // 杂色
-										 						this.cssModel["layerFX_outerGlow"]["shadingNoise"] = layereffects_element[8].value; // 抖动
-										 						this.cssModel["layerFX_outerGlow"]["antiAlias"] = layereffects_element[9].value; // 是否消除锯齿
-										 						//this.cssModel["layerFX_outerGlow"]["transferSpec"] = layereffects_element[10].descriptor[0].elenemt[0].value; // 等高线
-										 						this.cssModel["layerFX_outerGlow"]["inputRange"] = layereffects_element[11].value; // 品质范围
-									 		// 内发光
-									 		case "innerGlow": 	var layereffects_element = layerEffects[j].descriptor[0].element;
-									 						  	this.cssModel["layerFX_innerGlow"]=[];
-									 							this.cssModel["layerFX_innerGlow"]["enabled"] = layereffects_element[0].value; // 是否开启
-									 							this.cssModel["layerFX_innerGlow"]["mode"] = layereffects_element[1].value; // 混合模式
-									 							this.cssModel["layerFX_innerGlow"]["color"] = []; // 颜色
-									 							this.cssModel["layerFX_innerGlow"]["color"]["red"] = layereffects_element[2].descriptor[0].element[0].value;
-										 						this.cssModel["layerFX_innerGlow"]["color"]["green"] = layereffects_element[2].descriptor[0].element[0].value;
-										 						this.cssModel["layerFX_innerGlow"]["color"]["blue"] = layereffects_element[2].descriptor[0].element[0].value;
-										 						this.cssModel["layerFX_innerGlow"]["color"]["hexValue"] = (function(){
-										 						 	var hR=Math.round(layereffects_element[2].descriptor[0].element[0].value).toString(16),
-																		hG=Math.round(layereffects_element[2].descriptor[0].element[1].value).toString(16),
-																		hB=Math.round(layereffects_element[2].descriptor[0].element[2].value).toString(16); 
-																	return "#"+(layereffects_element[2].descriptor[0].element[0].value<16?("0"+hR):hR)+(layereffects_element[2].descriptor[0].element[1].value<16?("0"+hG):hG)+(layereffects_element[2].descriptor[0].element[2].value<16?("0"+hB):hB); 
-										 						 })();
-										 						this.cssModel["layerFX_innerGlow"]["opacity"] = layereffects_element[3].value; // 不透明度
-										 						this.cssModel["layerFX_innerGlow"]["glowTechnique"] = layereffects_element[4].value; // 图素-方法（发光方式）
-										 						this.cssModel["layerFX_innerGlow"]["chokeMatte"] = layereffects_element[5].value; // 图素-扩展
-										 						this.cssModel["layerFX_innerGlow"]["blur"] = layereffects_element[6].value; // 图素-模糊大小
-										 						this.cssModel["layerFX_innerGlow"]["shadingNoise"] = layereffects_element[7].value; // 抖动
-										 						this.cssModel["layerFX_innerGlow"]["noise"] = layereffects_element[8].value; // 杂色
-										 						this.cssModel["layerFX_innerGlow"]["antiAlias"] = layereffects_element[9].value; // 是否消除锯齿
-										 						this.cssModel["layerFX_innerGlow"]["innerGlowSource"] = layereffects_element[10].value; // 内发光光源
-										 						//this.cssModel["layerFX_innerGlow"]["transferSpec"] = layereffects_element[11].descriptor[0].elenemt[0].value; // 等高线
-										 						//this.cssModel["layerFX_innerGlow"]["inputRange"] = layereffects_element[12].value; // 品质范围
-									 						    break;				    break;
-									 		// 渐变填充
-									 		case "gradientFill": 	var layereffects_element = layerEffects[j].descriptor[0].element;
-									 						  		this.cssModel["layerFX_gradientFill"]=[];
-									 								this.cssModel["layerFX_gradientFill"]["enabled"] = layereffects_element[0].value; // 是否开启
-									 								this.cssModel["layerFX_gradientFill"]["mode"] = layereffects_element[1].value; // 混合模式
-									 								this.cssModel["layerFX_gradientFill"]["opacity"] = layereffects_element[2].value; // 不透明度
-									 								this.cssModel["layerFX_gradientFill"]["gradient"] = []; // 渐变
-									 								this.cssModel["layerFX_gradientFill"]["gradient"]["name"] = layereffects_element[3].descriptor[0].element[0].value; // 渐变名称
-									 								this.cssModel["layerFX_gradientFill"]["gradient"]["gradientForm"] = layereffects_element[3].descriptor[0].element[1].value; // 渐变类型
-									 								this.cssModel["layerFX_gradientFill"]["gradient"]["interfaceIconFrameDimmed"] = layereffects_element[3].descriptor[0].element[2].value; // 平滑度
-									 								this.cssModel["layerFX_gradientFill"]["gradient"]["color"] = []; // 渐变类型
-									 								// 颜色列表
-									 								var colorlist = layereffects_element[3].descriptor[0].element[3].list[0].element; // 颜色列表
-									 								for(var a; a<colorlist.length;a++){
-									 									this.cssModel["layerFX_gradientFill"]["gradient"]["color"][i]["red"] = colorlist[a].descriptor[0].element[0].descriptor[0].element[0].value;
-									 									this.cssModel["layerFX_gradientFill"]["gradient"]["color"][i]["green"] = colorlist[a].descriptor[0].element[0].descriptor[0].element[1].value;
-									 									this.cssModel["layerFX_gradientFill"]["gradient"]["color"][i]["blue"] = colorlist[a].descriptor[0].element[0].descriptor[0].element[2].value;
-									 									this.cssModel["layerFX_gradientFill"]["gradient"]["color"][i]["location"] = colorlist[a].descriptor[0].element[2].value; // 位置
-									 									this.cssModel["layerFX_gradientFill"]["gradient"]["color"][i]["midpoint"] = colorlist[a].descriptor[0].element[3].value; // 中点位置
-									 								};
-									 								// 不透明度列表
-									 								var transparencylist = layereffects_element[3].descriptor[0].element[4].list[0].element; // 透明度列表
-									 								for(var a; a< transparencylist.length; a++ ){
-									 									this.cssModel["layerFX_gradientFill"]["gradient"]["transparency"][i]["opacity"] = colorlist[a].descriptor[0].element[0].value;
-									 									this.cssModel["layerFX_gradientFill"]["gradient"]["transparency"][i]["location"] = colorlist[a].descriptor[0].element[1].value;
-									 									this.cssModel["layerFX_gradientFill"]["gradient"]["transparency"][i]["midpoint"] = colorlist[a].descriptor[0].element[2].value;
-									 								};
-
-									 								this.cssModel["layerFX_gradientFill"]["angle"] = layereffects_element[4].value; // 渐变角度
-									 								this.cssModel["layerFX_gradientFill"]["type"] = layereffects_element[5].value; // 渐变类型
-									 								this.cssModel["layerFX_gradientFill"]["reverse"] = layereffects_element[6].value; // 是否反向
-									 								this.cssModel["layerFX_gradientFill"]["dither"] = layereffects_element[7].value; // 是否仿色
-									 								this.cssModel["layerFX_gradientFill"]["align"] = layereffects_element[8].value; // 是否与图层对齐
-									 								this.cssModel["layerFX_gradientFill"]["scale"] = layereffects_element[9].value; // 缩放
-									 								this.cssModel["layerFX_gradientFill"]["offset"] = []; // 偏移
-									 								this.cssModel["layerFX_gradientFill"]["offset"]["horizontal"] = layereffects_element[10].descriptor[0].element[0].value;; // 水平偏移
-									 								this.cssModel["layerFX_gradientFill"]["offset"]["vertical"] = layereffects_element[10].descriptor[0].element[1].value;; // 垂直偏移
-
-
-									 						  		break;
-									 	};
-									 	*/
-
 									 };
 				                     break;
         	}
@@ -386,7 +331,10 @@ CssParse.prototype.toCss = function toCss(){
 	        cssArray[i] = csstext;
         }
 
-    };
-    
-    return cssArray;
+    }
+;
+    
+
+    return cssArray;
+
 };
