@@ -11,6 +11,79 @@ function CssParse(data){
 // 接口
 module.exports = CssParse;
 
+/*
+ *	处理图层
+ */
+CssParse.prototype.getLayerInfo = function(){
+    // 遍历图层
+    var layers = this.layers[0].layer;
+    for(var i=0; i< layers.length; i++){
+
+        var layer = layers[i], // 单个图层
+        	descriptor = layer.descriptor,
+        	descriptor_element = descriptor[0].element;
+
+        this.cssModel[i] = this.loopElement(descriptor_element); //图层信息
+
+    };
+
+    return this.cssModel;
+};
+
+/*
+ *	处理CSS
+ */
+CssParse.prototype.toCss = function(){
+
+	var csstext = "",
+    	cssArray = [],
+    	layerinfo = this.getLayerInfo();
+
+	//生成样式
+    if(this.cssModel["visible"]=="true"){
+
+    	// 如果开启了颜色填充，则采用颜色填充的颜色
+    	if(this.cssModel["layerFXVisible"] && this.cssModel["layerFX_solidFill"]){
+    		//var cssColor = this.cssModel["layerFX_solidFill"]["color"]["hexValue"];
+    	}else {
+    		//var cssColor = this.cssModel["background-color"]["hexValue"];
+    	}
+
+    	// 
+    	if(this.cssModel["layerFXVisible"] && this.cssModel["layerFX_frameFX"]){
+    		var cssBorder = this.cssModel["layerFX_frameFX"]["size"]+"px solid "+this.cssModel["layerFX_frameFX"]["color"]["hexValue"]+";";
+    	}else{
+    		var cssBorder = "";
+    	}
+
+
+    	var cssBox = [],
+    		cssWidth = "width:"+this.cssModel["width"]+"px;",  // 宽
+    		cssHeight = "height:"+this.cssModel["height"]+"px;", // 高
+    		//cssBackgroundColor = "background-color:"+cssColor+";",  // 背景色
+    		cssOpacity = "opacity:"+(this.cssModel["opacity"]/255).toFixed(2)+";", // 不透明度
+    		cssClassName = "."+this.cssModel["name"]; // 类名
+
+    	//cssBox.push(cssWidth); // 用数组存储样式
+
+    	csstext = cssClassName+"{";
+        csstext += cssWidth;
+        csstext += cssHeight;
+        csstext += cssBorder;
+        if((this.cssModel["opacity"]/255).toFixed(2) != 1.00){
+        	csstext += cssOpacity;
+        }
+        //csstext += cssBackgroundColor;
+        csstext +="}";
+        console.log(csstext);
+        cssArray[i] = csstext;
+    };
+
+    return cssArray;
+
+};
+
+
 // 处理十六进制颜色
 CssParse.prototype.parseColor = function(red,green,blue){
 	var hR=Math.round(red).toString(16),
@@ -90,68 +163,3 @@ CssParse.prototype.loopOne = function(data,array){
 		}
 	};
 }
-
-
-/*
- *	处理CSS
- */
-CssParse.prototype.toCss = function(){
-
-    var csstext = "",
-    	cssArray = [];
-
-    // 遍历图层
-    for(var i=0; i< this.layers.length; i++){
-
-        var layer = this.layers[i].layer[0], // 单个图层
-        	descriptor = layer.descriptor,
-        	descriptor_element = descriptor[0].element,
-        	layerInfo = this.loopElement(descriptor_element); //图层信息
-
-        //生成样式
-        if(this.cssModel["visible"]=="true"){
-
-        	// 如果开启了颜色填充，则采用颜色填充的颜色
-        	if(this.cssModel["layerFXVisible"] && this.cssModel["layerFX_solidFill"]){
-        		//var cssColor = this.cssModel["layerFX_solidFill"]["color"]["hexValue"];
-        	}else {
-        		//var cssColor = this.cssModel["background-color"]["hexValue"];
-        	}
-
-        	// 
-        	if(this.cssModel["layerFXVisible"] && this.cssModel["layerFX_frameFX"]){
-        		var cssBorder = this.cssModel["layerFX_frameFX"]["size"]+"px solid "+this.cssModel["layerFX_frameFX"]["color"]["hexValue"]+";";
-        	}else{
-        		var cssBorder = "";
-        	}
-
-
-        	var cssBox = [],
-        		cssWidth = "width:"+this.cssModel["width"]+"px;",  // 宽
-        		cssHeight = "height:"+this.cssModel["height"]+"px;", // 高
-        		//cssBackgroundColor = "background-color:"+cssColor+";",  // 背景色
-        		cssOpacity = "opacity:"+(this.cssModel["opacity"]/255).toFixed(2)+";", // 不透明度
-        		cssClassName = "."+this.cssModel["name"]; // 类名
-
-        	//cssBox.push(cssWidth); // 用数组存储样式
-
-        	csstext = cssClassName+"{";
-	        csstext += cssWidth;
-	        csstext += cssHeight;
-	        csstext += cssBorder;
-	        if((this.cssModel["opacity"]/255).toFixed(2) != 1.00){
-	        	csstext += cssOpacity;
-	        }
-	        //csstext += cssBackgroundColor;
-	        csstext +="}";
-	        console.log(csstext);
-	        cssArray[i] = csstext;
-        }
-
-    }
-;
-    
-
-    return cssArray;
-
-};

@@ -12,8 +12,13 @@ module.exports = function(app){
     app.get("/",function(req,res){
         res.render('index',{ title: 'LiveStart' });
     });
+
+    // 导入项目
+    app.get("/import",function(req,res){
+        res.render('import',{ title: 'LiveStart' });
+    });
     
-    // CSS显示
+    // PS2CSS模块
     app.get("/css",function(req,res){
         var parser = new xml2js.Parser();
         // 读取样式文件
