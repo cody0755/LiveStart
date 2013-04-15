@@ -26,7 +26,6 @@ CssParse.prototype.getLayerInfo = function () {
         this.cssModel[i] = this.loopElement(descriptor_element); //图层信息
 
     }
-    ;
 
     return this.cssModel;
 };
@@ -79,7 +78,6 @@ CssParse.prototype.toCss = function () {
         console.log(csstext);
         cssArray[i] = csstext;
     }
-    ;
 
     return cssArray;
 
@@ -123,9 +121,7 @@ CssParse.prototype.loopList = function (data, array) {
                 }
             }
         }
-        ;
     }
-    ;
 };
 
 CssParse.prototype.loopOne = function (data, array) {
@@ -139,7 +135,6 @@ CssParse.prototype.loopOne = function (data, array) {
             } else if (typeof data.$.id != "undefined") {
                 newArray = array[data.$.id] = [];
             }
-            ;
             this.loopList(data.list[0].element, newArray);
         }
         return null;
@@ -152,7 +147,6 @@ CssParse.prototype.loopOne = function (data, array) {
             } else if (typeof data.$.id != "undefined") {
                 newArray = array[data.$.id] = [];
             }
-            ;
             this.loopList(data.descriptor[0].element, newArray);
 
         }
@@ -168,5 +162,4 @@ CssParse.prototype.loopOne = function (data, array) {
             return oneArray;
         }
     }
-    ;
 }
