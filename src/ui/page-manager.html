@@ -1,0 +1,195 @@
+<!--#include "./common/head.html"-->
+		<div class="container">
+			<section>
+				<h2>页面管理</h2>
+				<table class="table table-striped">
+					<tr>
+						<th>线上URL</th>
+                        <th>文件名</th>
+						<th>页面描述</th>
+						<th>类库</th>
+						<th width=150>操作</th>
+					</tr>
+					<tr>
+                        <td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td><a href="#" style="display: none" class="btn btn-small btn-success J_addpage">创建页面</a></td>
+					</tr>
+				</table>
+
+			</section>
+
+		</div>
+		<!-- /container -->
+		<!-- 编辑页面信息的表单 -->
+		<div class="modal hide fade" id="J_addForm">
+			<form class="form-horizontal J_pageForm" style="margin:0">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+						&times;
+					</button>
+					<h3>创建页面</h3>
+				</div>
+				<div class="modal-body">
+
+                    <div class="control-group">
+                        <label class="control-label">线上URL：</label>
+                        <div class="controls">
+                            <input type="text" value="" name="url" placeholder="填写线上URL">
+                        </div>
+                    </div>
+					<div class="control-group">
+						<label class="control-label">文件名（英文）：</label>
+						<div class="controls">
+							<input type="text" value="" name="name" placeholder="填写页面的文件名">
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">页面描述：</label>
+						<div class="controls">
+							<input type="text" name="description" placeholder="填写页面的中文名或描述">
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">选择JS库：</label>
+						<div class="controls">
+							<span>请选择该页面使用的JS库，不选则使用项目配置</span>
+							<label class="checkbox">
+								<input type="checkbox" name="lib" value="KISSY">
+								KISSY </label>
+							<label class="checkbox">
+								<input type="checkbox" name="lib" value="JQUERY">
+								JQUERY </label>
+							<label class="checkbox">
+								<input type="checkbox" name="lib" value="YUI">
+								YUI </label>
+							<label class="checkbox">
+								<input type="checkbox" name="lib" value="ZEPTO">
+								ZEPTO </label>
+							<label class="checkbox">
+								<input type="checkbox" name="lib" value="SEAJS">
+								SEAJS </label>
+						</div>
+					</div>
+
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-primary J_save">
+						创建
+					</button>
+				</div>
+			</form>
+		</div>
+
+		<div class="modal hide fade" id="J_addInfo">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+				<h3>创建页面</h3>
+			</div>
+			<div class="modal-body">
+				<p class="J_infoWrap">
+					
+				</p>
+			</div>
+			<div class="modal-footer">
+				<a href="#" class="btn" data-dismiss="modal" aria-hidden="true">关闭</a>
+			</div>
+		</div>
+		<script type="text/tmpl" id="T_page">
+		    <tr data-name="${name}" class="J_item"><td>${url}</td><td><a href="http://127.0.0.1/${name}.${fileExt}">${name}</a></td><td>${description}</td><td>${lib}</td><td><a href="#" style="display:none" class="btn btn-small btn-danger J_delpage">删除</a></td></tr>
+		</script>
+		<script type="text/javascript">
+			$(function() {
+				//获取页面
+				function getPages(){
+				    $(".J_item").remove();
+				    $.get("/getpages",function(resp){
+                        var d = resp.data;
+                        $.each(d,function(i,val){
+                            createCell(val);
+                        });
+                    },"json");
+				}
+				getPages();
+				
+				//点击创建页面按钮弹出表单浮层
+				$("body").on("click", ".J_addpage", function(e) {
+					var form = $(".J_pageForm");
+					form[0].reset();
+					e.preventDefault();
+					$("#J_addForm").modal("show");
+				});
+				
+				//保存页面数据
+				$("#J_addForm").on("click",".J_save",function(e){
+					e.preventDefault();
+					var form = $(".J_pageForm"),
+                    texts = form.find("input[type='text']"),
+                    checkbox = form.find("input[type='checkbox']"),
+                    formData = {};
+                    texts.each(function(){
+                       var text = $(this), name = text.attr("name");
+                       formData[name] = text.val(); 
+                    });
+                    checkbox.each(function(){
+                       var box = $(this), name = box.attr("name");
+                       if(box[0].checked){
+                           if(!formData[name]||!$.isArray(formData[name])){
+                               formData[name]=[];
+                           }
+                           formData[name].push(box.val());
+                       } 
+                    });
+                    $("#J_addForm").modal("hide");
+                    $("#J_addInfo").modal("show");
+                    $(".J_infoWrap").html("正在创建...");
+                    $.get("/savepage",formData,function(resp){
+                        var d = resp.data;
+                    	if(d.fail){
+                    		$(".J_infoWrap").html("创建失败："+d.msg);
+                    		return;
+                    	}
+                        var html = '',i;
+                        for(i=0; i<d.length; i++){
+                            html+='<h5>'+d[i].action+'</h5>'+d[i].content;
+                        }
+                        $(".J_infoWrap").html(html);
+                        getPages();
+                    },"json");
+				});
+				
+				
+				$("body").on("click", ".J_delpage", function(e) {
+					e.preventDefault();
+					var step1 = arguments.callee, btn = e.currentTarget;
+					$(btn).removeClass("J_delpage").addClass("J_confirmdel").text("再次点击确定删除");
+					setTimeout(function() {
+						$(btn).addClass("J_delpage").removeClass("J_confirmdel").text("删除");
+					}, 2000);
+				});
+				
+				$("body").on("click", ".J_confirmdel", function(e) {
+					e.preventDefault();
+					var tr = $(e.currentTarget).parents("tr");
+					$.get("/delpage",{
+						name:tr.attr("data-name")
+					},function(d){
+						tr.remove();
+                    },"json");
+					
+				});
+				
+				//创建表格html
+				function createCell(data){
+					var tmpl = $("#T_page").html(),
+					tr = $(".J_addpage").parents("tr"),
+					html = juicer(tmpl,data);
+					$(html).insertBefore(tr);
+				}
+			});
+		</script>
+<!--#include "./common/foot.html"-->

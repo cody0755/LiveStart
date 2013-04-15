@@ -1,0 +1,52 @@
+{
+  "name": "livestart",
+  "version": "0.0.2",
+  "description": "A full Web front end develop envirment by thewei.",
+  "main": "bin/livestart",
+  "bin": {
+    "livestart": "./bin/livestart"
+  },
+  "dependencies": {
+    "commander": "~1.0.5",
+    "connect": "~2.6.2",
+    "cpr": "~0.0.6",
+    "debug": "~0.7.0",
+    "flex-combo": "~0.3.5",
+    "iconv-lite": "~0.2.5",
+    "is-utf8": "~0.2.0",
+    "joinbuffers": "~0.1.1",
+    "juicer": "~0.6.4-stable",
+    "mime": "~1.2.7",
+    "mkdirp": "~0.3.4",
+    "underscore": "~1.4.2",
+    "send": "0.1.0",
+    "css-combo": "0.2.6",
+    "socket.io": "*"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "mocha tests/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "toolchain",
+    "commandline",
+    "frontend"
+  ],
+  "homepage": "http://www.99is.com",
+  "author": {
+    "name": "thewei"
+  },
+  "license": "BSD",
+  "readme": "## `liveStart` 是什么\n\n`liveStart`是一套基于 [Node.js](http://www.nodejs.org) 的前端工程项目开发环境。\n\n目前是0.0.2版，实现了基本的模块化开发功能，之后将继续增加更多的功能与完善用户体验，作为一个node.js的初学者，欢迎各位多多提意见。\n\n## `liveStart` 的安装与升级\n\n安装`liveStart`最简单的方式是通过 [Node.js](http://www.nodejs.org) 提供的包管理工具`npm`来安装：\n\n    npm -g install livestart\n    \n    # Mac 和 Linux 环境下可能需要 sudo 权限\n    # 注意：Windows 平台下请使用原生命令行环境，不要在 Cygwin 下安装。\n\n    npm -g update livestart\n    \n    # 升级livestart到最新版\n    \n\t\n## `liveStart` 的使用\n\n初始化项目目录：\n\n    livestart init\n\n生成前端项目目录：\n\n    liveStart项目\n        - build\n\t\t\t- DEMO-20130407\n        - src\n            - pages\n            - mods\n            - widgets\n        - tests\n\t\t- docs\n\t\t- tools\n        - .livestart\n            - project.json\n\t\t\t- json\n\n    # src:      项目源文件，包含html、模板、样式、脚本、图片、swf等;\n    # tests:    项目测试脚本;\n    # build:    项目编译打包目录;\n    # docs:     项目文档存放目录；\n    # tools:    项目工具目录\n    # .livestart:    项目元信息，project.json 为项目配置文件。\n    \n    # .livestart为项目元信息目录\n    # 我们主要工作目录位于src，其中src又细分为pages、mods、widgets，其中pages存放静态页面资源、mods存放页面模块、widgets存放组件\n\t\n\n调试模式：\n\n    livestart debug\n    \n    # http://127.0.0.1:8000 作为项目调试地址，调试过程中显示效果与输出效果基本保持一致\n    # http://127.0.0.1:8001 作为项目可视化配置后台，可以根据项目需要进行配置、调试、打包\n\n\n调试模式：\n\n    livestart build\n    \n    # 最终页面打包，文件输出在build目录里\n\n\n## 模块化开发规则\n\n### HTML部分模块化\n\n我们开发时的页面放于 `pages` 目录，css、images这些静态资源放置于 `pages` 。 `pages` 目录也适合放layout框架页。\n\n切页面时产生公共模块，使用频繁的模块，应该做成模块放置于 `mods` 目录，用以下方法在 `pages` 里页面引用模块，url为引用的相对路径（引用的模块也可以是在`pages` 里的页面，兼容原来系统的语法）：\n\n    <!--#include \"url\"-->\n\n    <!--#include file=\"url\"-->\n\n    <!--#include virtual=\"url\"-->\n\n参考：http://www.iamued.com/qianduan/1998.html\n\n### CSS部分模块化\n\n比如页面头部我们只引用那一个样式，style.css，但是文件内容改成下面的：\n\n\n    /**\n     * xxx页面入口样式文件style.css\n     */\n\n    @import './utils/base.css';\n\n    /*页面基础框架（骨架）*/\n    @import './mods/layout.css';\n\n    @import './mods/header.css';\n    @import './mods/nav.css';\n\n    /*首页焦点图*/\n    @import './mods/flash-pic.css';\n\n    ………这里省略诸多模块………\n\n    @import './mods/footer.css';\n\n\n参考：https://github.com/daxingplay/css-combo\n\n### JS部分模块化\n\n目前是希望使用sea.js或者require.js实现\n\n### 最终合并\n\n最终build命令系统会把HTML、CSS、JS的模块进行合并输出到build目录，这个过程考虑加进一些其它的可选选项，比如CSS、JS压缩，注释文档输出等\n\n\t\n## `liveStart` 更多方法\n\n以下变量作为模板变量放于文档的合适地址：\n\n    ${firebug-js}\n    \n    # 调用Firebug-lite for IE\n\n\t\n\t${reload-js}\n\t\n\t# F5自动刷新\n\n\t\n\t${relativeUrl}\n\t\n\t# 根目录相对路径\n",
+  "readmeFilename": "README.md",
+  "_id": "livestart@0.0.2",
+  "dist": {
+    "shasum": "54a28f202dab0d07433832740e6869768f596f6a"
+  },
+  "_from": "livestart@0.0.2",
+  "_resolved": "https://registry.npmjs.org/livestart/-/livestart-0.0.2.tgz"
+}

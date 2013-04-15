@@ -1,0 +1,86 @@
+#!/usr/bin/env node
+
+var connect = require('connect');
+var http = require('http');
+var app = connect();
+var project = require('../lib/project.js');
+var path = require('path');
+var config = require('../lib/config.js');
+//var debug = require('debug')('livestart:livestart');
+var debug = console.log;
+
+config.init();
+
+var program = require('commander');
+// 帮助提示
+var helpInfo = {
+    'init': ['初始化项目目录。', 'Init project directory'],
+	'gui': ['启动gui管理界面', 'Start up a UI interface.'],
+	'build': ['项目文件编码。', 'Project charset'],
+};
+
+// 错误提示
+var errInfo = {
+    //'--data': ['--data 参数必须为Json格式。', 'parameter --data must be a Json format.']
+}
+
+// 语言
+var lang = process.env.LANG || 'zh';
+lang = (lang.indexOf('zh') === 0) ? 0 : 1;
+// 版本号
+program
+    .version('0.0.1')
+	
+// 初始化目录
+program
+    .command('init')
+    .description(helpInfo['init'][lang])
+    .action(function () {
+		var ret = {};
+        var info = program.data ? program.data : {};
+        ret = project(info);
+        ret.data.forEach(function (ac) {
+            debug(ac.action, ac.content);
+        });
+        process.exit(0);
+    });
+	
+// 启动GUI管理界面
+program
+    .command('gui')
+    .description(helpInfo['gui'][lang])
+    .action(function () {
+		var startServer = require('../lib/server.js');
+        startServer(true);
+    });
+    
+// 启动debug服务器
+program
+    .command('debug')
+    .description(helpInfo['gui'][lang])
+    .action(function () {
+		var startServer = require('../lib/debug.js');
+        startServer(true);
+    });
+
+// 构建项目
+program
+    .command('build')
+    .description(helpInfo['build'][lang])
+    .action(function () {
+        //debug('exec "%s" "%s"', cmd, program.data.toString());
+        var build = require('../lib/build.js');
+        build.build();
+        setTimeout(function () {
+            process.exit(0)
+        }, 1000);
+    });
+
+program.parse(process.argv);
+
+//var argv = opti.usage('用法：$0 [命令] [命令参数] [全局参数]')
+//    .describe('f', 'asasd')
+//    .argv;
+
+
+//startServer();

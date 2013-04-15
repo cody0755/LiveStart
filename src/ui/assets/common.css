@@ -1,0 +1,105 @@
+.logo{
+	width:180px;
+	height:33px;
+	background:url(logo.png) no-repeat;
+	background-size:contain;
+	display:inline-block;
+	position:relative;
+	top:3px;
+	left:-10px;
+}
+.navbar {
+	
+	margin:0 auto 10px;
+}
+.navbar-inverse .navbar-inner{
+	box-shadow: 0 0 10px rgba(0,0,0,0.5);
+	border-radius: 0 0 10px 10px;
+}
+.navbar .brand {
+	padding:0 20px;
+}
+.navbar .nav > li > a{
+	padding:10px 13px 10px;
+	text-shadow:1px 1px 0px rgba(0,0,0,1);
+	font-weight: normal;
+	font-size:16px;
+}
+.mod-list li{
+    position:relative;
+    margin-bottom:5px;
+    border-bottom:dashed 1px #ddd;
+    padding:10px 0 ;
+}
+.mod-list li .btn {
+    position:absolute;
+    right:0;
+    top:5px;
+}
+.white-well{
+    padding:10px;
+    background:#fff;
+    border-radius: 10px;
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.sub-form{
+    color:#ccc;
+    vertical-align: middle;
+}
+.sub-form [type="radio"]{
+    margin-top:-4px;
+    margin-right:5px;
+}
+.history-list {
+    padding:8px 18px 18px;
+    border:solid 1px #ddd;
+    border-radius:10px;
+    
+}
+.history-list ul {
+    padding:0;
+    margin:0;
+}
+.history-list li {
+    height:40px;
+    line-height:40px;
+    overflow:hidden;
+    border-bottom:dotted 1px #ddd;
+}
+.history-list li span {
+   width:290px;
+   display:inline-block;
+   white-space: nowrap;
+   text-overflow: ellipsis;
+}
+.file-list {
+    background:#f2f2f2;
+    padding:10px;
+    border-radius:10px;
+    margin:10px 0;
+}
+.file-list ul {
+    height:180px;
+    overflow:scroll;
+    overflow-x:hidden;
+    border:solid 1px #ddd;
+    margin:10px 0;
+    list-style: none;
+}
+.file-list ul li {
+    float:left;
+    width:200px;
+    height:25px;
+    line-height:25px;
+    border-radius: 7px;
+    cursor: pointer;
+    margin:5px 0 0 5px;
+    background:#f6f6f6;
+    padding:0 5px;
+}
+.file-list ul li:hover {
+    background:#fff;
+}
+.build-form .select-file{
+    cursor: pointer;
+}
