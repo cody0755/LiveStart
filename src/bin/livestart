@@ -14,9 +14,10 @@ config.init();
 var program = require('commander');
 // 帮助提示
 var helpInfo = {
-    'init': ['初始化项目目录。', 'Init project directory'],
+    'init': ['初始化项目目录。', 'Init project directory.'],
 	'gui': ['启动gui管理界面', 'Start up a UI interface.'],
-	'build': ['项目文件编码。', 'Project charset'],
+	'build': ['项目文件编码。', 'Project charset.'],
+	'add': ['添加项目文件', 'Add file for project.']
 };
 
 // 错误提示
@@ -45,15 +46,16 @@ program
         process.exit(0);
     });
 	
-// 启动GUI管理界面
+// 添加项目文件
 program
-    .command('gui')
-    .description(helpInfo['gui'][lang])
-    .action(function () {
-		var startServer = require('../lib/server.js');
-        startServer(true);
+    .command('add <modename> <pagename> [template]')
+    .description(helpInfo['add'][lang])
+    .action(function (modename, pagename, template) {
+		var addFile = require('../lib/addfile.js');
+        addFile.add(modename, pagename, template);
+		process.exit(0)
     });
-    
+	
 // 启动debug服务器
 program
     .command('debug')
