@@ -10,18 +10,23 @@ var juicer = require("juicer");
 var CONFIG_PROJECT = config.get('project');
 
 // 输出最终样式
-var output = function(realPath,debug){
+var output = function(realPath,debug,port){
+
+    var port = port || 8000,
+        backport = parseInt(port)+1;
+
     var data = {
-        baseurl: "http://127.0.0.1:8000"
+        baseurl: "http://127.0.0.1:"+port
     };
+
     pageContent = ssi(realPath); // 处理ssi语法
 	
 	// 仅在调试模式进行
 	if(debug){
 		// Firebug-lite嵌入,支持IE8及以下
-		pageContent = pageContent.replace("${firebug-js}",'<!--[if IE]></script><script src="http://127.0.0.1:8001/tools/firebug-lite/build/firebug-lite-beta.js"></script><![endif]-->');
+		pageContent = pageContent.replace("${firebug-js}",'<!--[if IE]></script><script src="http://127.0.0.1:'+backport+'/tools/firebug-lite/build/firebug-lite-beta.js"></script><![endif]-->');
 		// f5自动刷新
-		pageContent = pageContent.replace("${reload-js}",'<script src="/socket.io/socket.io.js"></script><script src="http://127.0.0.1:8001/tools/reload.js"></script></head>');
+		pageContent = pageContent.replace("${reload-js}",'<script src="/socket.io/socket.io.js"></script><script src="http://127.0.0.1:'+backport+'/tools/reload.js"></script></head>');
 	}else{
 		// 清除Firebut-lite的引入
 		pageContent = pageContent.replace("${firebug-js}",'');

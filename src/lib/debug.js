@@ -1,4 +1,4 @@
-var PORT = 8000;
+var DPORT = 8000;
 var http = require("http");
 var connect = require('connect');;
 var app = connect();
@@ -37,7 +37,7 @@ function listDirectory(parentDirectory,req,res){
   
 } 
 
-var listTpl = '<!doctype><html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8"></meta><title>liveStart文件服务器</title><style>*{ padding:0; margin:0;} ul{ line-height:30px; font-size:14px; padding:20px 50px;};a:hover { background:blue;color:#fff;}</style></head><body width="100%"><ul><li><a href="${parentdir}">${parentdirName}</a></li>{@each list as item}<li><a href="${item.path}">${item.path}</a></li>{@/each}</ul></body>';
+var listTpl = '<!doctype><html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8"></meta><title>liveStart文件服务器</title><style>*{ padding:0; margin:0;} ul{ line-height:30px; font-size:14px; padding:20px 50px;};a:hover { background:blue;color:#fff;}</style></head><body width="100%"><ul><li><a href="${parentdir}">${parentdirName}</a></li>{@each list as item}<li><a href="${item.path}">${item.pathname}</a></li>{@/each}</ul></body>';
   
 // 在Web页面上显示文件列表，格式为<ul><li></li><li></li></ul> 
 // TODO：改成读取文件模板，以后可以直接修改HTML达到效果。 
@@ -50,26 +50,41 @@ function formatBody(parent,files){
 		parentdir:"./",
 		list:[]
     };
-    
+
+    // 增加上一级目录
+    var parentDir = fs.statSync(parent),
+        pathDir = '';
+    if(parentDir.isDirectory(parent) && parent.charAt(parent.length-1)!=="\\"){
+        pathDir = parent.split('\\').pop()+'/';
+        parent = parent+'\\';  // 纠正不带/时路径错误问题
+    }
+
+    var dirPathStrArr = parent.split('\\');
+    var pathDir_temp = dirPathStrArr.pop();
+    var lenNum = dirPathStrArr.length -2,
+        tempUrl = [],
+        levelUrl = "../";
+
     files.forEach(function(val,index){  
-        var stat=fs.statSync(path.join(parent,val));  
-        if(stat.isDirectory(val)){  
-            val=path.basename(val)+"/";  
-        }else{  
-            val=path.basename(val);  
-        };
+        var stat=fs.statSync(path.join(parent,val)),
+            pathname = '';
+        if(stat.isDirectory(val)){
+            pathname = pathDir+path.basename(val)+"/";
+            val= path.basename(val)+"/";
+
+        }else{
+            pathname = pathDir+path.basename(val);
+            val= path.basename(val);
+
+        }
         var tempPath = {
-            path:val
+            pathname:val,
+            path:pathname
         };
         data.list.push(tempPath);  
     }); 
 	
-	// 增加上一级目录
-	var dirPathStrArr = parent.split('\\');
-		dirPathStrArr.pop();
-    var lenNum = dirPathStrArr.length -2,
-		tempUrl = [],
-		levelUrl = "../";
+
 	
 	if(lenNum && lenNum == 1){
 		data.parentdirName = "返回上一级目录";
@@ -90,9 +105,10 @@ function formatBody(parent,files){
 }  
 
 
-exports = module.exports = function(popupBrowser) {
+exports = module.exports = function(port,popupBrowser) {
 
 	var startTime = new Date();
+    port = port || DPORT;
 	var server = http.createServer(function(request, response) {
 		response.setHeader("Server", "liveStart Server");
 
@@ -154,7 +170,7 @@ exports = module.exports = function(popupBrowser) {
 
 								var pageContent = '';
 								try{
-									pageContent = compile.output(realPath,true);
+									pageContent = compile.output(realPath,true,port);
 								}
 								catch(e){
 									response.writeHead(500, "Internal Server Error", {'Content-Type': 'text/plain'});
@@ -227,8 +243,10 @@ exports = module.exports = function(popupBrowser) {
 			};
 			inst.pipe(res);
 		});
-		
-		http.createServer(app).listen(8001);
+
+        var backport = parseInt(port)+1;
+        console.log(backport);
+		http.createServer(app).listen(backport);
 		
 	};
 	
@@ -268,26 +286,26 @@ exports = module.exports = function(popupBrowser) {
 	});
 	
 	var startupSecond = ((new Date()).getTime() - startTime.getTime()) / 1000;
-	server.listen(PORT);
+	server.listen(port);
 	console.log('Livestart Server started, %s seconds.', startupSecond);
-	console.log("Livestart Server runing at port: " + PORT + ".");
+	console.log("Livestart Server runing at port: " + port + ".");
 
 	// 如果为true直接弹出窗口
     if(popupBrowser){
         setTimeout(function() {
-            var target = 'http://127.0.0.1:8000';
+            var target = 'http://127.0.0.1:'+port;
             var callback = null;
             switch (os.platform()) {
                 case 'win32':
-                    console.log('opening... http://127.0.0.1:8000');
+                    console.log('opening... http://127.0.0.1:'+port);
                     exec('start ' + target, callback);
                     break;
                 case 'darwin':
-                    console.log('opening... http://127.0.0.1:8000');
+                    console.log('opening... http://127.0.0.1:'+port);
                     exec('open ' + target, callback);
                     break;
                 case 'linux':
-                    console.log('opening... http://127.0.0.1:8000');
+                    console.log('opening... http://127.0.0.1:'+port);
                     var cmd = 'type -P gnome-open &>/dev/null  && gnome-open ' + p + ' || { type -P xdg-open &>/dev/null  && xdg-open ' + p + '; }';
                     exec(cmd, callback);
                 default:

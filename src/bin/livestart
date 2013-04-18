@@ -58,21 +58,21 @@ program
 	
 // 启动debug服务器
 program
-    .command('debug')
+    .command('debug [port]')
     .description(helpInfo['gui'][lang])
-    .action(function () {
+    .action(function (port) {
 		var startServer = require('../lib/debug.js');
-        startServer(true);
+        startServer(port,true);
     });
 
 // 构建项目
 program
-    .command('build')
+    .command('build [ver] [modename]')
     .description(helpInfo['build'][lang])
-    .action(function () {
+    .action(function (ver,modename) {
         //debug('exec "%s" "%s"', cmd, program.data.toString());
         var build = require('../lib/build.js');
-        build.build();
+        build.build(ver,modename);
         setTimeout(function () {
             process.exit(0)
         }, 1000);
