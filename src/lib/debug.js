@@ -11,7 +11,7 @@ var mime = require("../lib/debug_mime").types;
 var debugConfig = require("../lib/debug_config");
 var config = require('./config.js');
 var compile = require("../lib/compile");
-var pageDir = "src/pages";
+var io = require('socket.io')
 var juicer = require("juicer");
 var walk = require('./util/walk.js')
 var _ = require('underscore');
@@ -109,6 +109,12 @@ exports = module.exports = function(port,popupBrowser) {
 
 	var startTime = new Date();
     port = port || DPORT;
+
+    // 获取Pages目录
+    var prjInfo = config.get('project');
+    var root = config.root();
+    var pageDir = path.join(root, prjInfo.pagesDir);
+
 	var server = http.createServer(function(request, response) {
 		response.setHeader("Server", "liveStart Server");
 
@@ -127,6 +133,7 @@ exports = module.exports = function(port,popupBrowser) {
 		var realPath = path.join(CONFIG_PROJECT.pagesDir, path.normalize(pathname.replace(/\.\./g, "")));
 
 		var pathHandle = function (realPath) {
+            realPath = decodeURIComponent(realPath);
 			fs.stat(realPath, function (err, stats) {
 				if (err) {
 					response.writeHead(404, "Not Found", {'Content-Type': 'text/plain'});
@@ -251,42 +258,44 @@ exports = module.exports = function(port,popupBrowser) {
 	};
 	
 	appServer();
-	
-	
-	var io = require('socket.io').listen(server);
-	io.sockets.on('connection', function (socket) {
-		
-		var prjInfo = config.get('project');
-		var root = config.root();
-		
-		var pageDir = path.join(root, prjInfo.pagesDir);
-		var pageFiles = walk.walkSync(pageDir);
-		
-		//过滤掉非html文件
-		pageFiles = _.filter(pageFiles, function (file) {
-			if((file.lastIndexOf('.html') !== -1) || (file.lastIndexOf('.shtml') !== -1)){
-				return true;
-			}
-		});
-		pageFiles = pageFiles.sort(function (a, b) {
-			return a < b;
-		});
-		
-		_.map(pageFiles, function (file) {
-			fs.watch(file, function () {
-				socket.emit('reload', { reload: true });
-			});
-		});
-		
-		
-	  
-	  //socket.on('my other event', function (data) {
-	  //	console.log(data);
-	  //});
-	});
+
+	// 自动刷新
+    var _sockets = [],
+        _io,
+        _ref,
+        _ref1;
+
+    var watcher = require("watch-tree-maintained").watchTree(pageDir, {
+        "ignore": /(.*\/\.\w+|.*~$)/
+    });
+
+    _sockets = [];
+    _io = (_ref = io.listen(server, {
+        "log level": 0
+    }), sockets = _ref.sockets, _ref);
+    sockets.on("connection", function(socket) {
+        return _sockets.push(socket);
+    });
+    _ref1 = ["fileCreated", "fileModified", "fileDeleted"];
+    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        change = _ref1[_i];
+        watcher.on(change, function(file) {
+            var socket, _j, _len1, _results;
+            _results = [];
+            file = file.replace(pageDir,"");
+
+            for (_j = 0, _len1 = _sockets.length; _j < _len1; _j++) {
+                socket = _sockets[_j];
+                _results.push(socket.emit("reload", file));
+            }
+            return _results;
+        });
+    }
+    server.listen(port);
+    //return console.log("f5 is on localhost:" + port + " now.");
 	
 	var startupSecond = ((new Date()).getTime() - startTime.getTime()) / 1000;
-	server.listen(port);
+	//server.listen(port);
 	console.log('Livestart Server started, %s seconds.', startupSecond);
 	console.log("Livestart Server runing at port: " + port + ".");
 
@@ -316,5 +325,5 @@ exports = module.exports = function(port,popupBrowser) {
         }, 1000);
     }
 
-}
+};
 

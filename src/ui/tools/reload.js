@@ -1,12 +1,11 @@
 (function(){
 
-    var oldload = window.onload,
-        socket = io.connect();
+    var socket = io.connect(location.hostname);
+    var pathname = location.pathname;   // a prefix
+    var allAttachers,
+        oldload = window.onload;
 
-    window.onload = function(){
-
-        var currentLinkElements = {},
-            active = { "html": 1, "css": 1, "js": 1 };
+    var getFileAttachers = function(){
 
         // 获取样式与脚本
         var scripts = document.getElementsByTagName("script"),
@@ -14,45 +13,88 @@
             imgs = document.getElementsByTagName("img"),
             uris = [];
 
-        //console.log(imgs)
-
-        // 更新滚动位置
-        restoreScrollPosition();
 
         // 处理脚本
         for (var i = 0; i < scripts.length; i++) {
             var script = scripts[i], src = script.getAttribute("src");
-            if (src && isLocal(src))
-                uris.push(src);
-            //if (src && src.match(/\breload.js#/)) {
-            //  for (var type in active)
-            //    active[type] = src.match("[#,|]" + type) != null
-            //}
+            if (src && isLocal(src)){
+                uris.push({
+                    element:script,
+                    file:  decodeURIComponent(src)
+                })
+            }
+
         }
 
-        if (!active.js) uris = [];
-        if (active.html) uris.push(document.location.href); //当前的html
-
         // 处理样式
-        for (var i = 0; i < links.length && active.css; i++) {
-            var link = links[i], rel = link.getAttribute("rel"), href = link.getAttribute("href", 2);
+        for (var j = 0; j < links.length; j++) {
+            var link = links[j], rel = link.getAttribute("rel"), href = link.getAttribute("href", 2);
             if (href && rel && rel.match(new RegExp("stylesheet", "i")) && isLocal(href)) {
-                uris.push(href);
-                currentLinkElements[href] = link;
+                uris.push({
+                    element:link,
+                    file:  decodeURIComponent(href)
+                })
             }
         }
 
         // 处理图片
-        for (var i = 0; i < imgs.length; i++) {
-            var img = imgs[i], src = img.getAttribute("src");
-            if (src && isLocal(src))
-                uris.push(src);
+        for (var k = 0; k < imgs.length; k++) {
+            var img = imgs[k], src = img.getAttribute("src");
+            if (src && isLocal(src)){
+                uris.push({
+                    element:img,
+                    file:  decodeURIComponent(src)
+                })
+            }
         }
 
-        // 去重
-        uris=uris.unique();
+        return uris.unique();
 
-        //console.log(uris);
+    };
+
+    var reloadTag = function( attcher ){
+        var element = attcher.element;
+        //console.log( 'reloading ...' );
+        if( !!element.href ){
+            var href = element.href;
+            element.href = href;
+            return;         // done;
+        } else {
+            if(element.tagName==='SCRIPT'){
+                var y = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+                F5cookie.set('__liveStartScrollY', y);
+                setTimeout(function() {location.reload(true);}, 200); //刷新太快的话，有些动态网页显示的还是未更新前的页面
+            }else{
+                var src = element.src;
+                element.src = src;
+            }
+        }
+    };
+
+    window.onload = function(){
+
+        // 更新滚动位置
+        restoreScrollPosition();
+
+        allAttachers = getFileAttachers();
+
+        socket.on('reload', function ($data) {
+            pathname = decodeURIComponent( pathname );
+            if( pathname === $data.slice(1) ){       // type of $data is ./foo/bar/file.html
+                var y = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+                F5cookie.set('__liveStartScrollY', y);
+                setTimeout(function() {location.reload(true);}, 200); //刷新太快的话，有些动态网页显示的还是未更新前的页面
+            } else {
+                for(var i = 0; i < allAttachers.length; ++i){
+                    //var url = location.protocol + "//" + location.host+"/" + $data.slice(1);
+                    var url = $data.slice(1);
+                    if(url == allAttachers[i].file) {
+                        //console.log( "log:file", allAttachers.file );
+                        reloadTag( allAttachers[i] );
+                    }
+                }
+            }
+        });
 
 
         // 执行原来的onload()
@@ -60,29 +102,14 @@
             oldload();
         }
 
-        socket.on('reload', function (data) {
-            if(data.reload){
-                refresh()
-            }
-            socket.emit('sendScript', { filelist: uris });
-        });
-
-
-
     };
 
-    // 刷新
-    function refresh() {
-        var y = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
-        cookie.set('__liveStartScrollY', y);
-        setTimeout(function() {location.reload(true);}, 200); //刷新太快的话，有些动态网页显示的还是未更新前的页面
-    }
 
     // 修正滚动条位置
     function restoreScrollPosition()
     {
-        var y = cookie.get('__liveStartScrollY');
-        cookie.set('__liveStartScrollY', null);
+        var y = F5cookie.get('__liveStartScrollY');
+        F5cookie.set('__liveStartScrollY', null);
         if (!y) return;
 
         if (window.pageYOffset != null)
@@ -109,9 +136,9 @@
         var n = {},r=[]; //n为hash表，r为临时数组
         for(var i = 0; i < this.length; i++) //遍历当前数组
         {
-            if (!n[this[i]]) //如果hash表中没有当前项
-            {
-                n[this[i]] = true; //存入hash表
+            var tempThis = this[i].file;
+            if(!n[tempThis]) { //如果hash表中没有当前项
+                n[tempThis] = true; //存入hash表
                 r.push(this[i]); //把当前数组的当前项push到临时数组里面
             }
         }
@@ -120,8 +147,6 @@
 
 
 })();
-
-
 
 // Copyright (c) 2012 Florian H., https://github.com/js-coder https://github.com/js-coder/cookie.js
 
@@ -288,10 +313,10 @@
 
     if (typeof define === 'function' && define.amd) {
         define(function () {
-            return cookie;
+            return F5cookie;
         });
     } else if (typeof exports !== 'undefined') {
-        exports.cookie = cookie;
-    } else window.cookie = cookie;
+        exports.F5cookie = cookie;
+    } else window.F5cookie = cookie;
 
 }(document);

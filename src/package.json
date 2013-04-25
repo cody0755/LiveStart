@@ -1,6 +1,6 @@
 {
   "name": "livestart",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A full Web front end develop envirment by thewei.",
   "main": "bin/livestart",
   "bin": {
@@ -21,12 +21,10 @@
     "underscore": "~1.4.2",
     "send": "0.1.0",
     "css-combo": "0.2.6",
-    "socket.io": "*"
+    "watch-tree-maintained":"0.1.2",
+    "socket.io":"0.9.1-1"
   },
   "devDependencies": {},
-  "scripts": {
-    "test": "mocha tests/test.js"
-  },
   "repository": {
     "type": "git",
     "url": ""
@@ -43,6 +41,6 @@
   "license": "BSD",
   "readme": "## `liveStart` 是什么\n\n`liveStart`是一套基于 [Node.js](http://www.nodejs.org) 的前端工程项目开发环境。\n\n\n## `liveStart` 的安装\n\n安装`liveStart`最简单的方式是通过 [Node.js](http://www.nodejs.org) 提供的包管理工具`npm`来安装：\n\n    npm -g install livestart\n    \n    # Mac 和 Linux 环境下可能需要 sudo 权限\n    # 注意：Windows 平台下请使用原生命令行环境，不要在 Cygwin 下安装。\n\t\n\t",
   "readmeFilename": "README.md",
-  "_id": "livestart@0.0.1",
+  "_id": "livestart@0.0.4",
   "_from": "livestart"
 }

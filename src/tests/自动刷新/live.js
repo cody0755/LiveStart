@@ -21,7 +21,6 @@
   To monitor CSS and be notified that it has loaded, include it as: live.js#css,notify
 */
 (function () {
-
   var headers = { "Etag": 1, "Last-Modified": 1, "Content-Length": 1, "Content-Type": 1 },
       resources = {},
       pendingRequests = {},

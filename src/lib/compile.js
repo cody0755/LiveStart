@@ -88,13 +88,13 @@ var ssi = function(fullpath){
                 var getHtml = fs.readFileSync(realpath).toString();
                 str = str.replace(matchArr[i],getHtml); // 把模块内容合并
                 str = str.replace(/\${relativeUrl}/gi,tempRelativeUrl); // 纠正深层目录相对地址错误
-            };
+            }
         }
     }
     
     return str;
     
-}
+};
 
 // 输出接口
 exports.ssi = ssi;
