@@ -1,0 +1,31 @@
+<form class="form-horizontal" id="proxyForm" method="post">
+	<fieldset>
+            <div class="control-group">
+                <label class="control-label">网址</label>
+                <div class="controls">
+                    <input type="text" name="url" value="${url}" placeholder="请输入远程网络地址">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">服务器端口</label>
+                <div class="controls">
+                    <input type="text" name="webport" value="${webport}" placeholder="服务器端口，一般为80">
+                </div>
+            </div>
+			<div class="control-group">
+                <label class="control-label">本地端口</label>
+                <div class="controls">
+                    <input type="text" name="port" value="${port}" placeholder="Livestart默认为8000">
+                </div>
+            </div>
+			<div class="control-group">
+                <label class="control-label">文件映射(以||与;分隔)</label>
+                <div class="controls">
+					<textarea rows="3" name="proxyList"></textarea>
+                </div>
+            </div>
+            <div class="tc">
+                <button type="submit" class="btn btn-primary">确定</button>
+            </div>
+        </fieldset>
+</form>

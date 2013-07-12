@@ -1,0 +1,63 @@
+<!doctype>
+
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>liveStart文件服务器</title>
+    <link href="/livestart/css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link href="/livestart/css/bootstrap-responsive.min.css" type="text/css" rel="stylesheet">
+    <link href="/livestart/css/server-style.css" type="text/css" rel="stylesheet">
+    <script type="text/javascript" src="/livestart/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="/livestart/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/livestart/js/jquery.form.js"></script>
+    <script type="text/javascript" src="/livestart/js/juicer.js"></script>
+</head>
+<body width="100%">
+
+    <div class="main" style="padding: 10px;">
+		<div class="alert alert-info">
+		  <button type="button" class="close" data-dismiss="alert">×</button>
+		  <strong>提示：</strong>  拖放此链接(<a class="striking bookmarks replace-uid" href="javascript:void%20function(t,r,a,c,k){var domain = window.location.hostname+':'+window.location.port;t.tracker_type='bm';t.tracker_uid='zKJNzPk3';(k=t.TrackerGlobalEvent)?k.f(r):[(k=t[a]('script')).charset='utf-8',k.className='ls',k.src='http://'+domain+'/livestart/js/'+c+'.js?'+Math.random(),t.documentElement.appendChild(k)]}(document,'LivestartLoad','createElement','ls');" onclick="return false;" title="拖放此链接到您的书签栏">LiveStart!</a>)到您的书签栏，即可快速唤出LiveStart控制台.
+		</div>
+        <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th width="*">文件名</th>
+                <th class="tc" width="70">类型</th>
+                <th class="tc" width="80">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {@if initPath===false}
+            <tr>
+                <td><a href="${parentdir}">${parentdirName}</a></td>
+                <td class="tc f12"></td>
+                <td class="tc f12"></td>
+            </tr>
+            {@/if}
+            {@each list as item}
+            <tr>
+                <td><span class="${item.extClass}"></span><a class="fileicon" href="${item.path}">${item.pathname}</a></td>
+                <td class="tc f12">${item.extName}</td>
+                <td class="tc f12"><a href="#">生成</a> <span class="ml5 mr5 cccc">|</span> <a href="#">删除</a></td>
+            </tr>
+            {@/each}
+            </tbody>
+        </table>
+    </div>
+	
+	<footer class="footer">
+      <div class="container">
+        <p>Coded by <a href="http://weibo.com/thewei" target="_blank">@thewei</a> 2013 夏.</p>
+        <ul class="footer-links">
+          <li><a href="#" target="_blank">关于</a></li>
+          <li class="muted">·</li>
+          <li><a href="#" target="_blank">问题反馈</a></li>
+          <li class="muted">·</li>
+          <li><a href="#">版本变更记录</a></li>
+        </ul>
+      </div>
+    </footer>
+
+</body>
+</html>

@@ -1,6 +1,6 @@
 {
   "name": "livestart",
-  "version": "0.0.4",
+  "version": "0.0.7",
   "description": "A full Web front end develop envirment by thewei.",
   "main": "bin/livestart",
   "bin": {
@@ -9,20 +9,18 @@
   "dependencies": {
     "commander": "~1.0.5",
     "connect": "~2.6.2",
-    "cpr": "~0.0.6",
-    "debug": "~0.7.0",
-    "flex-combo": "~0.3.5",
     "iconv-lite": "~0.2.5",
-    "is-utf8": "~0.2.0",
-    "joinbuffers": "~0.1.1",
+	"htmlparser":"~1.7.6",
     "juicer": "~0.6.4-stable",
-    "mime": "~1.2.7",
-    "mkdirp": "~0.3.4",
-    "underscore": "~1.4.2",
-    "send": "0.1.0",
-    "css-combo": "0.2.6",
-    "watch-tree-maintained":"0.1.2",
-    "socket.io":"0.9.1-1"
+    "socket.io": "~0.9.16",
+	"coffee-script": "~1.6.3",
+	"http-proxy": "~0.10.3",
+	"joycss": "~0.5.1",
+	"js-beautify": "~1.4.0",
+	"less": "~1.4.1",
+	"node-file": "~0.1.1",
+	"node-sass": "~0.5.2",
+	"watch-tree-maintained": "~0.1.2"
   },
   "devDependencies": {},
   "repository": {
@@ -39,8 +37,6 @@
     "name": "thewei"
   },
   "license": "BSD",
-  "readme": "## `liveStart` 是什么\n\n`liveStart`是一套基于 [Node.js](http://www.nodejs.org) 的前端工程项目开发环境。\n\n\n## `liveStart` 的安装\n\n安装`liveStart`最简单的方式是通过 [Node.js](http://www.nodejs.org) 提供的包管理工具`npm`来安装：\n\n    npm -g install livestart\n    \n    # Mac 和 Linux 环境下可能需要 sudo 权限\n    # 注意：Windows 平台下请使用原生命令行环境，不要在 Cygwin 下安装。\n\t\n\t",
-  "readmeFilename": "README.md",
-  "_id": "livestart@0.0.4",
-  "_from": "livestart"
+  "readme": "## `liveStart` 是什么\n\n`liveStart`是一套基于 [Node.js](http://www.nodejs.org) 的前端工程项目模块化开发环境。\n\n\n## `liveStart` 的安装\n\n安装`liveStart`最简单的方式是通过 [Node.js](http://www.nodejs.org) 提供的包管理工具`npm`来安装：\n\n    npm -g install livestart\n    \n    # Mac 和 Linux 环境下可能需要 sudo 权限\n    # 注意：Windows 平台下请使用原生命令行环境，不要在 Cygwin 下安装。\n\t\n\t## `liveStart` 使用方法\n\n`liveStart`精简到一个命令，请cd命令切换到项目目录，执行livestart即可。\n\n\n`liveStart`更多最新的使用方法请访问 [DreamCity](http://www.99is.com) 获取，谢谢。",
+  "readmeFilename": "README.md"
 }

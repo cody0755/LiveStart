@@ -1,0 +1,57 @@
+<form class="form-horizontal" id="initForm" method="post">
+    <fieldset>
+        <div class="control-group">
+            <label class="control-label">中文标识</label>
+            <div class="controls">
+                <input type="text" name="cnname" value="" placeholder="项目中文标识">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">英文标识</label>
+            <div class="controls">
+                <input type="text" name="enname" value="" placeholder="项目英文标识，默认为app">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">描述</label>
+            <div class="controls">
+                <textarea name="description" rows="3"></textarea>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">选择项目类型</label>
+            <div class="controls">
+                <select name="producttype">
+                    <option value="none">不使用模板</option>
+                    <option value="web">WEB项目模板</option>
+                    <option value="wap">WAP项目模板</option>
+                </select>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">选择类库</label>
+            <div class="controls">
+                <select name="lib">
+					<option value="none">不使用脚本</option>
+                    <option value="none">脚本不需要类库</option>
+                    <option value="jquery">jQuery 1.9</option>
+                    <option value="zepto">Zepto 1.0</option>
+                </select>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">是否使用CSS预编译</label>
+            <div class="controls">
+                <select name="isScript">
+                    <option value="false">否</option>
+                    <option value="sass">Sass</option>
+                    <option value="less">Less</option>
+                </select>
+            </div>
+        </div>
+        <input type="hidden" name="version" value="v0">
+        <div class="tc">
+            <button type="submit" class="btn btn-primary">确定</button>
+        </div>
+    </fieldset>
+</form>

@@ -1,0 +1,25 @@
+<form class="form-horizontal" id="picspiritForm" method="post">
+	<table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>文件名</th>
+                  <th>文件地址</th>
+                </tr>
+              </thead>
+              <tbody>
+				{@each data as item, index}
+                <tr>
+                  <td><input type="checkbox" name="${index}" ></td>
+                  <td>${item.name}${item.ext}</td>
+                  <td>${item.file}</td>
+                </tr>
+				{@/each}
+              </tbody>
+            </table>
+    <fieldset>
+        <div class="tc">
+            <button type="submit" class="btn btn-primary">进行图片精灵操作</button>
+        </div>
+    </fieldset>
+</form>

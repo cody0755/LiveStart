@@ -1,0 +1,22 @@
+{
+    "cnname"     : "",
+    "enname"     : "app",
+    "description": "",
+    "producttype": "web",
+    "version"    : "0",
+    "lib"        : "false",
+    "isScript"   : "false",
+    "charset"    : "utf8",               
+    "pagesDir"   : "src/web",            
+    "modsDir"    : "src/mods",             
+    "buildDir"   : "build",               
+	"docsDir"    : "docs",                 
+	"toolsDir"   : "tools",               
+    "testsDir"   : "tests",               
+	"resourceDir": "resource",
+    "reload"     : "true",
+    "iefirebug"  : "true",	
+    "cdnPath"    : "",                     
+    "port"       : "8000",                      
+    "hosts"      : ""                         
+}

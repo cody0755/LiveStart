@@ -1,0 +1,66 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>liveStart文件服务器</title>
+    <link href="/livestart/css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link href="/livestart/css/bootstrap-responsive.min.css" type="text/css" rel="stylesheet">
+    <link href="/livestart/css/server-style.css" type="text/css" rel="stylesheet">
+    <script type="text/javascript" src="/livestart/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="/livestart/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/livestart/js/jquery.form.js"></script>
+    <script type="text/javascript" src="/livestart/js/juicer.js"></script>
+    <script type="text/javascript" src="/livestart/js/server.js"></script>
+</head>
+<body width="100%">
+
+    <div id="top-navbar" class="navbar" style="margin-bottom: 0;">
+        <div class="navbar-inner">
+			<button id="closeFrame" class="close pull-left">×</button>
+            <a class="brand">LiveStart</a>
+            <ul id="top-nav" class="nav pull-left" data-target="pages">
+				<li id="nowpage" class="active mode_off"><a onclick="return false;" href="">当前页面</a></li>
+                <li id="pagelist" class="mode_off"><a onclick="return false;" href="">页面列表</a></li>
+				<li id="modlist"  class="mode_off"><a onclick="return false;" href="">模块列表</a></li>
+                <li class="dropdown mode_on"><a href="" onclick="return false;" class="dropdown-toggle" data-toggle="dropdown">项目管理<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <!-- <li><a href="#" id="addMod">添加模块</a></li>  -->
+                        <!-- <li><a href="#" id="addPage">添加页面</a></li> -->
+						<li><a href="#" id="productconfigTag">配置项目</a></li>
+						<li><a href="#" id="picspirit" >图片精灵</a></li>
+						<li><a href="#" id="proxyId" >文件代理</a></li>
+                    </ul>
+                </li>
+                <!-- <li class="mode_on"><a id="productconfigTag" onclick="return false;" href="">配置项目</a></li> -->
+                <li class="mode_on"><a id="build" onclick="return false;" href="">构建项目</a></li>
+            </ul>
+            <ul class="nav pull-right">
+                <li class="dropdown mode_on"><a href="" onclick="return false;" class="dropdown-toggle" data-toggle="dropdown">帮助<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a id="help" href="http://weibo.com/thewei" target="_blank">帮助主题</a></li>
+                        <li><a id="email" href="mailto:thewei@99is.com" target="_blank">提提意见</a></li>
+                        <li><a id="share" href="http://weibo.com/thewei" onclick="return false;">推荐给好友</a></li>
+                        <li><a id="about" href="#" onclick="return false;">关于...</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 配置项目 -->
+    <div class="modal" id="Modal" style="display: none">
+        <div class="modal-header">
+            <a class="close" data-dismiss="modal">×</a>
+            <h3><span>提示信息</span></h3>
+        </div>
+
+        <div class="modal-body">
+
+        </div>
+        <div class="modal-footer">
+        </div>
+    </div>
+    <!-- /配置项目 -->
+
+
+</body>
+</html>

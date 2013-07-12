@@ -1,0 +1,8 @@
+{
+    "init" : {
+        "creatProductDir":""
+    },
+    "update" : {
+        "getVersion":""
+    }
+}

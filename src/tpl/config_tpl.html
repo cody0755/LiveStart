@@ -1,0 +1,65 @@
+
+    <form class="form-horizontal" id="configedit" method="post">
+        <fieldset>
+            <div class="control-group">
+                <label class="control-label">中文名称</label>
+                <div class="controls">
+                    <input type="text" name="cnname" value="${cnname}" placeholder="请输入项目中文标识">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">英文名称</label>
+                <div class="controls">
+                    <input type="text" name="enname" value="${enname}" placeholder="请输入项目英文标识">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">描述</label>
+                <div class="controls">
+                    <textarea name="description" rows="3">${description}</textarea>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">项目编码</label>
+                <div class="controls">
+                    <select name="charset">
+                        <option value="utf8" {@if charset==="utf8"}selected="selected"{@/if} >utf8</option>
+                        <option value="gbk" {@if charset==="ghk"}selected="selected"{@/if}>gbk</option>
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">端口</label>
+                <div class="controls">
+                    <input type="text" name="port" value="${port}" placeholder="请输入DEMO服务器端口">
+                </div>
+            </div>
+			<div class="control-group">
+                <label class="control-label">是否自动刷新</label>
+                <div class="controls">
+					<select name="reload">
+                        <option value="true" {@if reload==="true"}selected="selected"{@/if} >是</option>
+                        <option value="false" {@if reload==="false"}selected="selected"{@/if}>否</option>
+                    </select>
+                </div>
+            </div>
+			<div class="control-group">
+                <label class="control-label">是否使用Firebug For IE</label>
+                <div class="controls">
+					<select name="iefirebug">
+                        <option value="true" {@if iefirebug==="true"}selected="selected"{@/if} >是</option>
+                        <option value="false" {@if iefirebug==="false"}selected="selected"{@/if}>否</option>
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">CDN域名</label>
+                <div class="controls">
+                    <input type="text" name="cdnPath" value="${cdnPath}" placeholder="没有则留空">
+                </div>
+            </div>
+            <div class="tc">
+                <button type="submit" class="btn btn-primary">确定</button>
+            </div>
+        </fieldset>
+    </form>

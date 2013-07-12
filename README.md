@@ -1,163 +1,205 @@
-## `liveStart` 是什么
+liveStart从0.03版开始已经实视了我们以前使用shtml的include特性制作前端DEMO的能力，并且比Apache的shtml的方式更加灵活。过去的日子，我们使用了这种SSI特性开发了不少的前端DEMO，写了一个基于Python脚本进行最终的合并，总体上来说还是减少了不少的工作量。从0.05版开始，为了更好的使用，liveStart放弃了原来的shtml的语法，进行了新的架构设计。
 
-`liveStart`是一套基于 [Node.js](http://www.nodejs.org) 的前端工程项目开发环境，参考了 [clam](https://npmjs.org/package/clam) 的部分代码
+但鉴于现在的前端DEMO越来越复杂，对于前端团队协作有了很大的挑战，很幸运我们周围有不少可以减轻我们的前端工作的工具。liveStart就是其中一个。
 
-目前是0.0.3版，实现了基本的模块化开发功能，之后将继续增加更多的功能与完善用户体验，作为一个node.js的初学者，欢迎各位多多提意见。
-我的博客: [DreamCity](http://www.99is.com)
+liveStart主要用于前端DEMO模块化开发，通过简单的语法，把重复的页面模块分离出来，在不同的页面进行引用，在开发最后，提供一键构建项目，把模块进行合并起来。最终交付的DEMO将脱离liveStart可使用。
+
+---
 
 ## `liveStart` 的安装与升级
 
 安装`liveStart`最简单的方式是通过 [Node.js](http://www.nodejs.org) 提供的包管理工具`npm`来安装：
 
     npm -g install livestart
-    
     # Mac 和 Linux 环境下可能需要 sudo 权限
     # 注意：Windows 平台下请使用原生命令行环境，不要在 Cygwin 下安装。
 
     npm -g update livestart
-    
     # 升级livestart到最新版
     
-	
-## `liveStart` 的使用
+---
 
-初始化项目目录：
+## 启动项目
+这里假设创建一个hello_livestart为目录名的项目，我们打开命令提示符，输入如下命令:
 
-    livestart init
+>mkdir hello_livestart    // 创建目录
+>cd hello_livestart        // 切换到hello_livestart目录
+>livestart                    // 启动livestart工具
 
-生成前端项目目录：
+这样的我们就创建了一个标准的liveStart前端项目目录，这只发生在第一次启动此项目。之后使用 livestart命令时，将自动检测是否有livestart前端项目存在，存在则直接启动调试服务器：
 
-    liveStart项目
-        - build
-			- DEMO-20130407-v2
-        - src
-            - pages
-            - mods
-            - widgets
-        - tests
-		- docs
-		- tools
-        - .livestart
-            - project.json
-			- json
+>http://127.0.0.1:8000   // 默认端口为8000，可以在项目配置文件里修改
 
-    # src:      项目源文件，包含html、模板、样式、脚本、图片、swf等;
-    # tests:    项目测试脚本;
-    # build:    项目编译打包目录;
-    # docs:     项目文档存放目录；
-    # tools:    项目工具目录
-    # .livestart:    项目元信息，project.json 为项目配置文件。
+这里我们可以在浏览器里打开http://127.0.0.1:8000进行操作，这时项目的根目录指向hello_livestart/src/web。
+
+---
+
+## 项目结构
+
+        - build （项目编译打包目录;）
+    		- v1-20130407091010
+        - src (项目源文件，包含html、模板、样式、脚本、图片、swf等;)
+            - web (项目开发根目录)
+            - mods (项目开发模块目录)
+        - tests (项目测试脚本)
+		- docs (项目文档存放目录)
+		- tools (项目工具目录)
+        - .livestart (项目元信息，记录livestart系统信息，无须理会)
+            - project.json (项目配置文件)
+
+我们主要工作目录位于src，其中src又细分为web、mods，其中web存放静态页面资源、mods存放页面模块、组件。
+
+所以web目录里就像我们平时开发DEMO里一样，作为本地HTTP服务器的根目录。到这一步，似乎还是太平常了，没有什么变化。下面才是我们的重头戏，前端DEMO模块化开发实践：
+
+---
+
+## 模块化开发
+
+我们的前端DEMO通常有很多通用的模块，反复调用，有时只是数据不是一样，结构完全一样，有时完全一样却要在十多个页面重复调用，这时，如果PM突然跟你说，这个页面的头部要进行修改，某某地方如何如何，你一看，十多个页面要调整，眼都直了。
+
+这时我们只需要把上述的头部做成一个模块，然后在每个页面调用就可以。以后，如果这个模块需要进行修改，我们只需要修改一个模块文件，其它的页面将全部应用我们修改的变化。
+
+### 模块结构
+
+这里我们虚拟一个模块目录，在mods目录里我们自己新建了几个目录，结构与内容如下：
+
+    - mods
+        - layout
+            - web_layout.html
+            - js
+                - web_layout.js
+            - css
+                - web_layout.css
+            - json
+                - web_layout.json
+        - btn
+            - btn_blue.html
+            - btn_green.html
+            - btn_orange.html
+            - js
+                - mod.js
+            - css
+                - style.css
+            -json
+                btn_blue.html
+
+我们可以看到btn文件夹表示一个模块（以文件夹为单位），模块可以包含模块自己同名的css、js、json数据源（用于数据模拟）。
+
+模块目录可以有多个小模块在里面，比如:
+
+    btn_blue.html
+    btn_green.html
+    btn_orange.html
+
+我们也可以把css直接写为style.css，大家共用此css。同理，js可以写在mod.js而不是btn_blue.js之类的，模块共用此js。一切是为了简化没必要的操作。
+
+### 模块引用
+
+现在我们已经建好的btn的模块，我们需要在页面需要用到蓝色按钮的地方进行使用，我们只需要引用此按钮。
+
+在页面中进行调用则很容易，直接在相应的地方插入一个标签，我们省去的后缀:
+
+    <include file="btn:btn_blue" />
+
+### 模块布局
+
+我们的页面可能有几种不同的布局，比如首页，列表，商品详情，评论，留言。这时，我们需要把它们的共用的部分做成模块，比如列表，我们在web_layout.html会把列表的内容区域填充为{+CONTENT+}(请将+替代为__)，这时我们新建的页面会自动套用这个布局。
+
+    <layout file="layout:homeLayout" />
+
+### 模块区块
+
+有一些区块，我们是反复调用，结构差不多一样，只是内容可能不一样，这时，我们就可以用block定义一些这样的模块。大家可能可以想到，其实layout也可以用block代替，只是layout在一个页面只能用一次，block却可以使用多个。看自己的喜好使用。
+
+    <block file="block:blockfile">
+        这里可以是通用模块的内容
+    </block>
     
-    # .livestart为项目元信息目录
-    # 我们主要工作目录位于src，其中src又细分为pages、mods、widgets，其中pages存放静态页面资源、mods存放页面模块、widgets存放组件
-	
+### 变量传值与前端模板语法
 
-调试模式：
+我们的前端模块页面支持前端模板，使用的是[juicer](http://juicer.name/docs/docs_zh_cn.html)。
+数据源由json目录里的同名json文件提供。如果我们使用的标签如下面的格式，那个data的数据源会覆盖原来json文件里的数据。相当于CSS那个优先级。
 
-    livestart debug
+通过这种形式，我们可以配合Juicer做一些页面的高亮class的定义。data的传值需要用单引号，千万不要用双引号：
 
-    # 你可以在debug后面加上项目调试端口，以满足同时打开多个调试窗口。例如：
-    livestart debug 9000
-
-    #项目可视化配置后台端口自动加1；即输入9000，则项目可视化配置后台端口为9001
+    <include file="btn:btn_blue" data='"title":"确定"' />
     
-    # http://127.0.0.1:8000 作为默认项目调试地址，调试过程中显示效果与输出效果基本保持一致
-    # http://127.0.0.1:8001 作为默认项目可视化配置后台，可以根据项目需要进行配置、调试、打包
+大家可以充分利用前端模板的特性，比如它的：
+
+a.判断 {@if} ... {@else if} ... {@else} ... {@/if}：
+
+我们可以利用来做高亮：
+
+    {@if index===3}
+         class = "on"
+    {@else}
+        class = "off"
+    {@/if}
+
+b. 循环遍历 {@each} ... {@/each}
+
+如果你需要对数组进行循环遍历的操作，就可以像这样使用 `each`：
+
+    {@each list as item}
+        ${item.prop}
+    {@/each}
+
+如果遍历过程中想取得当前的索引值，也很方便.
+
+    {@each list as item, index}
+        ${item.prop}
+        ${index} //当前索引
+    {@/each}
+
+c. ${变量}
+
+用 ${} 输出变量值，其中 _ 为对数据源的引用（如 ${_}，常用于数据源为数组的情况）。支持自定义函数（通过自定义函数你可以实现很多有趣的功能，类似 ${data|links} 就可以 通过事先定义的自定义函数 links 直接对 data 拼装出一些有趣的东西出来 ）.
+
+    ${name}
+    ${name|function}
+    ${name|function, arg1, arg2}
+
+d. 注释 {# 注释内容}
+
+为了后续代码的可维护性和可读性，我们可以在模板中增加注释.
+
+    {# 这里是注释内容}
 
 
-打包模式：
+---
 
-    livestart build
+## 自动刷新
 
-    # 你可以在build后加上版本号数字，则编译的目录最后以版本号结尾，否则将以temp结尾，如果已存在此目录，会进行文件覆盖。例如：
+在项目配置中勾选了自动刷新后，liveStart将自动监听web里的文件变化，当文件有编辑文化时，浏览器会自动进行刷新，免去你常按F5。这里的功能参考了前端的一个小工具F5。
 
-    livestart build 2
+---
 
-    # 则输出DEMO-20130407-v2目录
-    # 最终页面打包，文件输出在build目录里
+## Firebug For IE
 
+由于IE的开发者工具太弱了，但是也找不到更多的代替品。这里我们使用了Firebug Lite作为调试工具的补充。在项目配置中开启后，在IE浏览器，你可以按F12快速召出Firebug
 
-## 模块化开发规则
+---
 
-### HTML部分模块化
+## 文件代理
 
-我们开发时的页面放于 `pages` 目录，css、images这些静态资源放置于 `pages` 。 `pages` 目录也适合放layout框架页。
+用于远程网站的调试，你可以指定远程的资源文件与本地资源文件的映射关系，通过本地文件的修改快速解决远程调试的困惑。这里只是一个小工具的补充，你也可以选择更专业的工具，比如Fiddler2。
 
-切页面时产生公共模块，使用频繁的模块，应该做成模块放置于 `mods` 目录，用以下方法在 `pages` 里页面引用模块，url为引用的相对路径（引用的模块也可以是在`pages` 里的页面，兼容原来系统的语法）：
+---
 
-    <!--#include "url"-->
-    <!--#include file="url"-->
-    <!--#include virtual="url"-->
+## 图片精灵
 
-    # 使用其中一种方法即可
+把众多的小图片进行合并，是减少连接数的一种方法。liveStart同样集成了这样一种工具，使用的是joycss模块。
 
-参考：http://www.iamued.com/qianduan/1998.html
+---
 
-### CSS部分模块化
+## 模块化开发的意义
 
-比如页面头部我们只引用那一个样式，style.css，但是文件内容改成下面的：
+我们并不是为了追求复杂而去做这个系统，更希望能够通过这个系统解决一些现实中的问题。
+过去的日子，我们的页面开发主要以写页面为主，而公司的业务常常有很多交叉相同的地方出现，在DEMO制作上，我们重复地做了很多工作，而这些工作在我们眼里看来，是应该可以避免的。而在项目协作开发的过程中，CSS冲突，页面做重复了模块的情况常有发生，虽然我们也已经像《编写高质量前端代码》一书里进行了深刻的思考，对于实际情况进行调整。在大的项目里，我们分出一个主要的前端工程师对页面的模块与页面进行整理，归类，整体把握前端开发过程中有可能出现上面的问题的及时纠正。
 
+后来，我们发现，其中分出来的这一个前端工程师的工作也是可以通过liveStart这样的工具进行分担，使得他可以从中脱离出来，做更多有用的事件。
 
-    /**
-     * xxx页面入口样式文件style.css
-     */
+liveStart是为前端模块化开发协作而生，是为解决这样的事情。
 
-    @import './utils/base.css';
+也许你也有和我们一样的困惑，也许你已经有了解决方法或者更多的解决方案，制作了各种自动化的小工具。如果有，可以跟我们交流沟通，如果没有，我们建议你来使用一个liveStart，没准它能够帮助你解决工作上的一些问题。
 
-    /*页面基础框架（骨架）*/
-    @import './mods/layout.css';
-
-    @import './mods/header.css';
-    @import './mods/nav.css';
-
-    /*首页焦点图*/
-    @import './mods/flash-pic.css';
-
-    ………这里省略诸多模块………
-
-    @import './mods/footer.css';
-
-    # 多人协作写样式时请尽量使用这一种方式
-
-
-参考：https://github.com/daxingplay/css-combo
-
-### JS部分模块化
-
-目前是希望使用sea.js或者require.js实现
-
-### 最终合并
-
-最终build命令系统会把HTML、CSS、JS的模块进行合并输出到build目录，这个过程考虑加进一些其它的可选选项，比如CSS、JS压缩，注释文档输出等
-
-	
-## `liveStart` 更多使用方法
-
-以下变量作为模板变量放于文档的合适地址：
-
-    ${firebug-js}
-    # 调用Firebug-lite for IE
-
-	${reload-js}
-	# F5自动刷新
-
-	${relativeUrl}
-	# 根目录相对路径
-
-
-## `liveStart` 使用技巧
-
-    暂空
-
-## `liveStart` 版本更新
-
-    0.0.3 1、打包时过滤掉.svn，.idea等目录
-          2、build方法后面可自加版本号输出打包，方法：livestart build 1
-          3、静态文件资源管理器地址栏不带'/'时引起目录层级错误的问题
-          4、完成自定义端口，方法：livestart debug 5000
-
-    0.0.2 1、完成基本的模块化工作方法，与原来的系统进行兼容
-          2、完成静态文件服务器
-          3、预留后台GUI管理界面，供以后完善。
-
-    0.0.1 开始项目，参考clam的技术进行开发，目标兼容原来的系统，引进新的一些好方法提升工作效率

@@ -1,45 +1,54 @@
-var fs = require('fs');
-var mkdirp = require('mkdirp');
-var path = require('path');
-//var _ = require("underscore");
-//var debug = require('debug')('clam:config');
-var beautify = require('./util/beautify.js').js_beautify;
-var debug = console.log;
-var EventEmitter = require('events').EventEmitter
+var fs = require('fs'),
+    path = require('path'),
+    nodefile    = require("node-file"),
+    appDir = path.resolve(__dirname, '..'),
+    taskList = path.join(appDir, 'config/task.json'),
+    log = require('./util/logger').log,
+    EventEmitter = require('events').EventEmitter,
+    projectList = path.join(appDir, 'config/project.json'),
+    beautify    = require('js-beautify').js_beautify,
+    PRJROOT = null, //项目根路径
+    CONFIG = {};   //配置信息
+
+EVENT = new EventEmitter();
 
 //project 模块配置信息
 var META = {
     dir : '.livestart'
 };
 
-var PRJROOT = null; //项目根路径
-var CONFIG = {};   //配置信息
-var EVENT = new EventEmitter();
+// 读取配置文件
+function readConfig(path){
+    return JSON.parse(fs.readFileSync(path));
+}
 
+// 读取任务列表
+function taskListRead(){
+    return readConfig(taskList);
+}
 
-/**
- * 保存一个配置信息
- * @param key
- * @param config
- */
+// 读取项目配置
+function projectListRead(){
+    return readConfig(projectList);
+}
+
+// 创建配置文件
 function set(key, config){
     if(!PRJROOT){
         init();
     }
     var metaDir = path.join(PRJROOT, META.dir);
-    debug('目录:%s', metaDir);
     var metaFileName = path.join(metaDir, key+'.json');
     CONFIG[key] = config;
     if(!fs.existsSync(metaDir)){
-        mkdirp.sync(metaDir);
+        nodefile.mkdirsSync(metaDir);
     }
     var configStr = JSON.stringify(config);
     configStr = beautify(configStr);
 
     if(!fs.existsSync(metaFileName)){
-        debug("创建配置文件 %s",metaFileName);
+        log('create', 'info', "创建配置文件:%s"+metaFileName);
         fs.writeFileSync(metaFileName, configStr);
-        //createWatch(key+'.json', metaDir);
         return;
     }
 
@@ -47,41 +56,24 @@ function set(key, config){
     return;
 }
 
-function readFromFile(file) {
-    var metaDir = path.join(PRJROOT, META.dir);
-    var metaFile = path.join(metaDir, file);
-    var key = file.replace('.json', '');
-    if(!fs.existsSync(metaFile)){
-        CONFIG[key] = null;
+// 获取配置信息
+
+function get(key){
+    if(!PRJROOT){
+        init();
+    }
+	
+	var metaDir = path.join(PRJROOT, META.dir);
+    if(!fs.existsSync(metaDir)){
         return;
     }
-    var metaStr = fs.readFileSync(metaFile);
-    debug('从文件%s获取配置信息。', key);
-    metaStr = metaStr.toString().replace(/[\n\r]/g, '');
-    CONFIG[key] = JSON.parse(metaStr);
+	
+    CONFIG[key] = readConfig(path.join(metaDir, key+'.json'));
+	
+    return CONFIG[key];
 }
 
-/**
- * 创建一个文件watch
- * @param file
- * @param metaDir
- */
-function createWatch(file, metaDir) {
-    debug("监听%s", file);
-    var fullPath = path.join(metaDir, file);
-    var key = file.replace('.json', '');
-    fs.watch(fullPath, function (event) {
-        readFromFile(file);
-        EVENT.emit(key + 'Change', key);
-    });
-    EVENT.emit(key + 'Change', key);
-}
-
-/**
- * 寻找项目根目录并初始化变量。
- * @param dir 从此参数指定的目录起，开始向上寻找项目目录。一旦发现此目录或者最近祖先目录包含.clam目录，则认定其为项目根目录。
- * @return {*} 项目根目录
- */
+// 寻找项目根目录并初始化变量
 function init() {
 	
     //只初始化一次
@@ -113,52 +105,14 @@ function init() {
         PRJROOT = dir;
     }
 	
-	
-    var metaDir = path.join(PRJROOT, META.dir);
-    if(!fs.existsSync(metaDir)){
-        return;
-    }
-	
-    var files = fs.readdirSync(metaDir);
-
-    files.forEach(function (file, i) {
-        if (/.+\.json$/.test(file)) {
-            readFromFile(file);
-            createWatch(file, metaDir);
-        }
-    });
+	// 监视配置文件是否变化，变化则重新加载
+	fs.watchFile(path.join(metaDir,"project.json"), function() {
+		EVENT.emit('projectChange');
+	});
 	
 }
 
-
-/**
- * 获取配置信息
- * @param key
- * @return {*}
- */
-function get(key){
-    if(!PRJROOT){
-        init();
-    }
-	
-	var metaDir = path.join(PRJROOT, META.dir);
-    if(!fs.existsSync(metaDir)){
-        return;
-    }
-	
-	var files = fs.readdirSync(metaDir);
-	
-	files.forEach(function (file, i) {
-        if (/.+\.json$/.test(file)) {
-            readFromFile(file);
-            createWatch(file, metaDir);
-        }
-    });
-	
-    return CONFIG[key];
-}
-
-
+// 返回根目录
 function root(){
     if(!PRJROOT){
         init();
@@ -171,7 +125,10 @@ function on(evtName, fn){
 }
 
 exports.init = init;
+exports.root = root;
 exports.set = set;
 exports.get = get;
 exports.on = on;
-exports.root = root;
+exports.readJson = readConfig;
+exports.taskListRead = taskListRead;
+exports.projectListRead = projectListRead;

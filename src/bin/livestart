@@ -1,88 +1,77 @@
 #!/usr/bin/env node
 
-var connect = require('connect');
-var http = require('http');
-var app = connect();
-var project = require('../lib/project.js');
-var path = require('path');
-var config = require('../lib/config.js');
-//var debug = require('debug')('livestart:livestart');
-var debug = console.log;
+var program    = require('commander'),
+    TaskQe     = require('../lib/util/taskQe.js'), // 异步事件任务队列类
+    config     = require('../lib/config.js'),
+    tasklist   = config.taskListRead(); // 任务列表
 
+// 初始化项目目录
 config.init();
 
-var program = require('commander');
 // 帮助提示
+/*
 var helpInfo = {
-    'init': ['初始化项目目录。', 'Init project directory.'],
-	'gui': ['启动gui管理界面', 'Start up a UI interface.'],
-	'build': ['项目文件编码。', 'Project charset.'],
-	'add': ['添加项目文件', 'Add file for project.']
+    'update': ['获取版本信息'],
+    'init'  : ['初始化项目目录'],
+	'debug' : ['启动调试服务器'],
+	'build' : ['项目文件编码'],
+	'add'   : ['添加项目文件'],
 };
+*/
 
-// 错误提示
-var errInfo = {
-    //'--data': ['--data 参数必须为Json格式。', 'parameter --data must be a Json format.']
-}
+// 启动debug服务器
+var taskInit = new TaskQe();
+taskInit.add("creatProductDir");
+taskInit.run(false,function(){
+    setTimeout(function(){
+        var startServer = require('../lib/debugServer.js');
+            startServer();
+    },10);
+});
 
-// 语言
-var lang = process.env.LANG || 'zh';
-lang = (lang.indexOf('zh') === 0) ? 0 : 1;
-// 版本号
+
+
+
+
+/*
+// 获取版本信息
 program
-    .version('0.0.1')
-	
-// 初始化目录
+    .command('update')
+    .description(helpInfo['update'])
+    .action(function () {
+        var taskInit = new TaskQe();
+        var taskName;
+        for(taskName in tasklist.update){
+            taskInit.add(taskName);
+        }
+        taskInit.run(false,function(){ 
+            process.exit(0);
+        });
+    });
+    
+// 初始化项目目录
 program
     .command('init')
-    .description(helpInfo['init'][lang])
+    .description(helpInfo['init'])
     .action(function () {
-		var ret = {};
-        var info = program.data ? program.data : {};
-        ret = project(info);
-        ret.data.forEach(function (ac) {
-            debug(ac.action, ac.content);
+        var taskInit = new TaskQe();
+        var taskName;
+        for(taskName in tasklist.init){
+            taskInit.add(taskName);
+        }
+        taskInit.run(false,function(){
+            process.exit(0);
         });
-        process.exit(0);
     });
-	
-// 添加项目文件
-program
-    .command('add <modename> <pagename> [template]')
-    .description(helpInfo['add'][lang])
-    .action(function (modename, pagename, template) {
-		var addFile = require('../lib/addfile.js');
-        addFile.add(modename, pagename, template);
-		process.exit(0)
-    });
-	
+    
 // 启动debug服务器
 program
     .command('debug [port]')
-    .description(helpInfo['gui'][lang])
+    .description(helpInfo['debug'])
     .action(function (port) {
 		var startServer = require('../lib/debug.js');
         startServer(port,true);
     });
-
-// 构建项目
-program
-    .command('build [ver] [modename]')
-    .description(helpInfo['build'][lang])
-    .action(function (ver,modename) {
-        //debug('exec "%s" "%s"', cmd, program.data.toString());
-        var build = require('../lib/build.js');
-        build.build(ver,modename);
-        setTimeout(function () {
-            process.exit(0)
-        }, 1000);
-    });
-
+    
 program.parse(process.argv);
-
-//var argv = opti.usage('用法：$0 [命令] [命令参数] [全局参数]')
-//    .describe('f', 'asasd')
-//    .argv;
-
-
-//startServer();
+*/
